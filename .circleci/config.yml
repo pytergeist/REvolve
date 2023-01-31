@@ -1,0 +1,25 @@
+version: 2.1
+
+
+orbs:
+  python: circleci/python@2.1.1
+
+jobs:
+  build-and-test:
+    docker:
+      - image: cimg/python:3.9
+    steps:
+      - checkout
+      - python/install-packages:
+          args: pytest tensorflow tensorflow_addons
+          pkg-manager: pipenv
+      - run:
+          command: |
+            pipenv run pytest
+          name: Test
+
+workflows:
+  main:
+    jobs:
+      - build-and-test
+

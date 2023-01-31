@@ -1,0 +1,8 @@
+.idea
+testing.ipynb
+revolve/.coverage
+revolve/.ipynb_checkpoints
+revolve/coverage.sh
+revolve/conv_testing.ipynb
+operation_testing.ipynb
+

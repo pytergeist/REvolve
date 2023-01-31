@@ -1,0 +1,21 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+numpy = "*"
+pandas = "*"
+h5py = "*"
+
+[dev-packages]
+jupyter = "*"
+tensorflow-addons = "*"
+scikit-learn = "*"
+#tensorflow-macos = "*"
+pytest = "*"
+pytest-cov = "*"
+circleci = "*"
+
+[requires]
+python_version = "3.9"
