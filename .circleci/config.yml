@@ -1,6 +1,5 @@
 version: 2.1
 
-
 orbs:
   python: circleci/python@2.1.1
 
@@ -19,7 +18,7 @@ jobs:
 
           name: Test algorithms
 
-jobs:
+
   build-and-test-architectures:
     docker:
       - image: cimg/python:3.9
@@ -33,6 +32,7 @@ jobs:
             pipenv run pytest -v --cov-report term-missing --cov=architectures tests/architectures
 
           name: Test architectures
+
 workflows:
   main:
     jobs:
