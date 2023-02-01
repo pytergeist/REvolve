@@ -5,7 +5,7 @@ orbs:
   python: circleci/python@2.1.1
 
 jobs:
-  build-and-test:
+  build-and-test-algorithms:
     docker:
       - image: cimg/python:3.9
     steps:
@@ -15,11 +15,26 @@ jobs:
           pkg-manager: pipenv
       - run:
           command: |
-            pipenv run pytest
-          name: Test
+            pipenv run pytest -v --cov-report term-missing --cov=algorithms tests/algorithms
 
+          name: Test algorithms
+
+jobs:
+  build-and-test-architectures:
+    docker:
+      - image: cimg/python:3.9
+    steps:
+      - checkout
+      - python/install-packages:
+          args: pytest tensorflow tensorflow_addons
+          pkg-manager: pipenv
+      - run:
+          command: |
+            pipenv run pytest -v --cov-report term-missing --cov=architectures tests/architectures
+
+          name: Test architectures
 workflows:
   main:
     jobs:
-      - build-and-test
-
+      - build-and-test-algorithms
+      - build-and-test-architectures
