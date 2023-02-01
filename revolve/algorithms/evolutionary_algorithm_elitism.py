@@ -1,7 +1,10 @@
 from numpy.typing import NDArray
-from typing import List
+from typing import List, Union
 import numpy as np
+import numpy.typing as npt
 from typing import List
+from revolve.architectures.strategies import MLPStrategy, Conv2DStrategy
+from revolve.architectures.chromosomes import MLPChromosome, Conv2DChromosome
 
 
 class EvolutionaryAlgorithmElitism:
@@ -19,7 +22,7 @@ class EvolutionaryAlgorithmElitism:
     """
 
     def __init__(self,
-                 strategy: object,
+                 strategy: Union[MLPStrategy, Conv2DStrategy],
                  pop_size: int,
                  elitism_size: int,
                  operations: object,
@@ -27,9 +30,9 @@ class EvolutionaryAlgorithmElitism:
         self.strategy = strategy
         self.pop_size = pop_size
         self.elitism_size = elitism_size
-        self.data = []
+        self.data: List[list] = []
         self.elite_models = [None] * elitism_size
-        self.population = []
+        self.population: List[Union[MLPChromosome, Conv2DChromosome]] = []
         self.operations = operations
 
     def elitism(self, generation_data: List, elitism_size: int, models: list):
@@ -75,7 +78,7 @@ class EvolutionaryAlgorithmElitism:
         models = self._population_asses(x_train, y_train, x_test, y_test, epochs)
 
         generation_data = [
-            [chromosome, chromosome.loss, chromosome.metrics, generation]
+            [chromosome, chromosome.loss, chromosome.metric, generation]
             for chromosome in self.population
         ]
 
@@ -160,22 +163,26 @@ class EvolutionaryAlgorithmElitism:
         return models
 
     def model_asses(self,
-                    chromosome,
-                    x_train, y_train, x_test, y_test,
-                    epochs
+                    chromosome: Union[MLPChromosome, Conv2DChromosome],
+                    x_train: npt.NDArray, y_train: npt.NDArray,
+                    x_test: npt.NDArray, y_test: npt.NDArray,
+                    epochs: int
                     ):
 
-        model, mse, r_square = self.strategy.asses(
+        model, loss, metric = self.strategy.asses(
             x_train, y_train,
             x_test, y_test,
             chromosome, epochs,
         )
-        chromosome.loss = mse
-        chromosome.metrics = r_square
+        chromosome.loss = loss
+        chromosome.metric = metric
 
         return model
 
-    def model_asses_elite(self, idx, chromosome, x_test, y_test):
+    def model_asses_elite(self,
+                          idx: int, chromosome: Union[MLPChromosome, Conv2DChromosome],
+                          x_test: npt.NDArray, y_test: npt.NDArray):
+
         mse, r_square = self.elite_models[idx].evaluate(x_test, y_test, verbose=0)
         chromosome.loss = mse
         chromosome.metric = r_square

@@ -1,9 +1,10 @@
 import random
 import tensorflow as tf
 from typing import Any
+from .bases import BaseGene
 
 
-class FCGene:
+class FCGene(BaseGene):
     def __init__(self,
                  gene_type: str, neurons: int,
                  activation: str, dropout: float,
@@ -25,7 +26,7 @@ class FCGene:
         assert isinstance(self.l1, float) and self.l1 >= 0, f'Invalid L1: {self.l1}'
         assert isinstance(self.l2, float) and self.l2 >= 0, f'Invalid L2: {self.l2}'
 
-    def mutate(self, learnable_parameters):
+    def mutate(self, learnable_parameters: dict):
 
         parameters = self.get_attribute_names()
 
@@ -50,7 +51,7 @@ class FCGene:
         return attribute_names[2:]
 
 
-class Conv2DGene:
+class Conv2DGene(BaseGene):
     def __init__(self, gene_type: str, filters: int, kernel_size: int, stride: int, activation: str):
         self.name = 'conv2d_gene'
         self.gene_type = gene_type
@@ -65,12 +66,12 @@ class Conv2DGene:
         assert isinstance(stride, int), f'invalid stride: {self.stride}, enter as integer'
         assert hasattr(tf.keras.activations, self.activation), f'unknown activation function: {self.activation}'
 
-    def mutate(self, learnable_parameters):
+    def mutate(self, learnable_parameters: dict):
 
         parameters = self.get_attribute_names()
 
         for param in parameters:
-            if learnable_parameters.get(param):  # change to simple if not statement
+            if learnable_parameters.get(param):
                 setattr(self, param, random.choice(learnable_parameters[param]))
             else:
                 pass
@@ -90,18 +91,20 @@ class Conv2DGene:
         return attribute_names[2:]
 
 
-class ParameterGene:
+class ParameterGene(BaseGene):
     def __init__(self, parameter_name: str, parameter: Any):
         self.name = 'param_gene'
         self.gene_type = parameter_name
         self.parameter = parameter
 
     def mutate(self, learnable_parameters):
-        """ CHECK THESE PARAMETERS ARE MUTATING AND CHANGE TO CLASS METHOD IF NOT"""
 
         if learnable_parameters.get(self.gene_type):
             self.parameter == random.choice(learnable_parameters[self.gene_type])
 
     def get_attributes(self):
         return list(self.__dict__.values())[1:]
+
+    def get_attribute_names(self):
+        return self.gene_type
 

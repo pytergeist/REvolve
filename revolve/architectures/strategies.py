@@ -4,13 +4,15 @@ import numpy as np
 import numpy.typing as npt
 from typing import (
     List, Union,
+    Any
 )
 import tensorflow_addons as tfa
 from .genes import FCGene, Conv2DGene, ParameterGene
 from .chromosomes import MLPChromosome, Conv2DChromosome
+from.bases import BaseStrategy
 
 
-class MLPStrategy:
+class MLPStrategy(BaseStrategy):
 
     def __init__(
             self,
@@ -59,7 +61,7 @@ class MLPStrategy:
 
         return learnable_parameters
 
-    def parameter_choice(self, parameter):
+    def parameter_choice(self, parameter: Any):
 
         params = self.learnable_parameters.get(parameter)
 
@@ -72,7 +74,7 @@ class MLPStrategy:
 
         assert isinstance(population_size, int)
 
-        population = []
+        population: List[MLPChromosome] = []
 
         training_params = [
             'batch_size',
@@ -80,7 +82,7 @@ class MLPStrategy:
             'learning_rate',
         ]
 
-        key_store = []
+        key_store: List[str] = []
 
         while len(population) < population_size:
 
@@ -120,7 +122,7 @@ class MLPStrategy:
               y_train: npt.NDArray[np.float32],
               x_test: npt.NDArray[np.float32],
               y_test: npt.NDArray[np.float32],
-              chromosome: object,
+              chromosome: MLPChromosome,
               epochs: int
               ):
 
@@ -156,7 +158,7 @@ class MLPStrategy:
         return model, mse, r_square
 
 
-class Conv2DStrategy:
+class Conv2DStrategy(BaseStrategy):
 
     def __init__(
             self,
@@ -226,7 +228,7 @@ class Conv2DStrategy:
 
         assert isinstance(population_size, int)
 
-        population = []
+        population: List[Conv2DChromosome] = []
 
         training_params = [
             'batch_size',
@@ -234,7 +236,7 @@ class Conv2DStrategy:
             'learning_rate',
         ]
 
-        key_store = []
+        key_store: List[str] = []
 
         while len(population) < population_size:
 
@@ -284,7 +286,7 @@ class Conv2DStrategy:
               y_train: npt.NDArray[np.float32],
               x_test: npt.NDArray[np.float32],
               y_test: npt.NDArray[np.float32],
-              chromosome: object,
+              chromosome: Conv2DChromosome,
               epochs: int
               ):
 

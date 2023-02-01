@@ -16,6 +16,7 @@ tensorflow-macos = "*"
 pytest = "*"
 pytest-cov = "*"
 circleci = "*"
+mypy = "*"
 
 [requires]
 python_version = "3.9"

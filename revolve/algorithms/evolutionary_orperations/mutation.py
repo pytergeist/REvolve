@@ -1,10 +1,11 @@
 import random
-from typing import List
+from typing import List, Union
+from revolve.architectures.chromosomes import MLPChromosome, Conv2DChromosome
 
 
 def mutation(
-        offspring: List, probability: float,
-        learnable_parameters: List,
+        offspring: Union[MLPChromosome, Conv2DChromosome], probability: float,
+        learnable_parameters: dict,
 ):
     """
     Performs mutation on the given offspring.

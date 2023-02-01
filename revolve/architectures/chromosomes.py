@@ -1,12 +1,11 @@
-from .genes import FCGene, ParameterGene
-from typing import List, Union, Optional
+from .genes import FCGene, ParameterGene, Conv2DGene
+from typing import List, Union, Optional, Any, Callable
 import tensorflow as tf
-import numpy.typing as npt
 import numpy as np
-import tensorflow_addons as tfa
+from .bases import BaseChromosome
 
 
-class MLPChromosome:
+class MLPChromosome(BaseChromosome):
     """
     Class to store MLP layers and param genes as chromosome list
     Methods:
@@ -16,7 +15,7 @@ class MLPChromosome:
     """
 
     def __init__(self,
-                 genes: List[Union[FCGene, ParameterGene]],
+                 genes: list,
                  loss: Optional[float] = None,
                  metric: Optional[float] = None,
                  ):
@@ -30,7 +29,8 @@ class MLPChromosome:
             key += gene.get_attributes()
         return "".join(map(str, key))
 
-    def get_parameter(self, param: str, default_param):
+    def get_parameter(self, param: str, default_param: Any):
+
         param_list = list(map(lambda x: x.parameter if x.gene_type == param
                               else None, self.genes
                               )
@@ -44,7 +44,7 @@ class MLPChromosome:
 
     def decode(self,
                input_shape: int, regression_target: int,
-               regression_activation: str) -> tf.keras.Sequential:
+               regression_activation: str) -> tf.keras.Model:
         """
         decode encoded neural network architecture and return model
         :return: sequential keras model
@@ -76,7 +76,7 @@ class MLPChromosome:
         return tf.keras.Model(inputs=_inputs, outputs=output)
 
 
-class Conv2DChromosome:
+class Conv2DChromosome(BaseChromosome):
     """
     Class to store MLP layers and param genes as chromosome list
     Methods:
@@ -85,16 +85,20 @@ class Conv2DChromosome:
             return - tf.keras.Model
     """
 
-    def __init__(self, genes: List[Union[FCGene, ParameterGene]]):
+    def __init__(self, genes: list, loss: Optional[float] = None,
+                 metric: Optional[float] = None,
+                 ):
         self.genes = genes
+        self.loss = loss
+        self.metric = metric
 
-    def get_unique_key(self):
+    def get_unique_key(self) -> str:
         key = []
         for gene in self.genes:
             key += gene.get_attributes()
         return "".join(map(str, key))
 
-    def get_parameter(self, param: str, default_param):
+    def get_parameter(self, param: str, default_param) -> Any:
         param_list = list(map(lambda x: x.parameter if x.gene_type == param
                               else None, self.genes
                               )
