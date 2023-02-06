@@ -111,7 +111,7 @@ def test_fit_model(chromosome, request):
     epochs = 10
     batch_size = 128
 
-    result = chromosome.fit_model(
+    chromosome.fit_model(
         model_mock, train_data_mock, valid_data_mock, epochs, batch_size, callback_mock
     )
 
@@ -122,7 +122,6 @@ def test_fit_model(chromosome, request):
         callbacks=[callback_mock],
         verbose=0,
     )
-    assert result == model_mock.fit.return_value
 
 
 @pytest.mark.parametrize(
@@ -178,9 +177,7 @@ def test_get_fitness(chromosome, data, params, request):
     result = chromosome.get_fitness(
         params,
         chromosome.genes,
-        train_data,
-        valid_data,
-        test_data,
+        mock_data,
         epochs,
         callback,
     )
@@ -192,6 +189,7 @@ def test_get_fitness(chromosome, data, params, request):
     chromosome.fit_model.assert_called_with(
         model_mock, train_data, valid_data, epochs, batch_size, callback
     )
+
     chromosome.evaluate_model.assert_called_with(model_mock, test_data, batch_size)
 
     assert result == (model_mock, loss, metric)

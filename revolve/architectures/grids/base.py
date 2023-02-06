@@ -1,14 +1,8 @@
 from dataclasses import dataclass
-from typing import Union, List
 
 
 @dataclass
-class ConvParameterGrid:
-    # possible learnable architecture parameter definitions
-    filters: Union[List[int], int]
-    kernel_size: Union[List[int], int]
-    stride: Union[List[int], int]
-
+class ParameterGrid:
     def get(self, parameter_name):
         return getattr(self, parameter_name)
 

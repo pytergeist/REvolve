@@ -1,15 +1,13 @@
-from numpy.typing import NDArray
-from typing import List, Union
+from typing import Union, Tuple
+import tensorflow as tf
 import numpy as np
-import numpy.typing as npt
 from typing import List
-from revolve.architectures.strategies import MLPStrategy, Conv2DStrategy
-from revolve.architectures.chromosomes import MLPChromosome, Conv2DChromosome
+from revolve.architectures.base import Strategy, Chromosome
 
 
 class EvolutionaryAlgorithmElitism:
     """
-    A class that implements a genetic algorithm with elitism.
+    Class that implements a genetic algorithm with elitism.
 
     Parameters:
     strategy (object): The strategy class object that will be used to assess the population.
@@ -21,45 +19,49 @@ class EvolutionaryAlgorithmElitism:
     population (list): The population of chromosomes for the current generation.
     """
 
-    def __init__(self,
-                 strategy: Union[MLPStrategy, Conv2DStrategy],
-                 pop_size: int,
-                 elitism_size: int,
-                 operations: object,
-                 ):
+    def __init__(
+        self,
+        strategy: Strategy,
+        pop_size: int,
+        elitism_size: int,
+        operations: object,
+    ):
         self.strategy = strategy
         self.pop_size = pop_size
         self.elitism_size = elitism_size
         self.data: List[list] = []
         self.elite_models = [None] * elitism_size
-        self.population: List[Union[MLPChromosome, Conv2DChromosome]] = []
+        self.population: List[Strategy] = []
         self.operations = operations
 
-    def elitism(self, generation_data: List, elitism_size: int, models: list):
+    @staticmethod
+    def elitism(population: List, elitism_size: int, models: list):
         """
         Selects the elite individuals from the current generation.
 
         Parameters:
         generation_data (list): The data for the current generation.
         """
-        elite_idx = np.array(generation_data, dtype=object)[:, 1].argsort()[:elitism_size]
-        elite_models = [
-            model for model in
-            list(map(models.__getitem__, elite_idx))
+        elite_idx = np.argsort([chromosome.loss for chromosome in population])[
+            :elitism_size
         ]
+        elite_models = [model for model in list(map(models.__getitem__, elite_idx))]
         population = [
-            chromosome[0] for chromosome in
-            list(map(generation_data.__getitem__, elite_idx))
+            chromosome for chromosome in list(map(population.__getitem__, elite_idx))
         ]
 
         return population, elite_models
 
-    def evolve_population(self,
-                          x_train: NDArray, y_train: NDArray,
-                          x_test: NDArray, y_test: NDArray,
-                          epochs: int, generation: int
-                          ) -> List:
+    @staticmethod
+    def get_min_fitness(population):
+        min_idx = np.argsort([chromosome.loss for chromosome in population])[0]
+        return population[min_idx]
 
+    def evolve_population(
+        self,
+        data: Tuple[tf.data.Dataset],
+        generation: int,
+    ) -> List:
         """
         Evolves the population of chromosomes for a given number of generations.
 
@@ -75,48 +77,37 @@ class EvolutionaryAlgorithmElitism:
         List: A list containing the best chromosome for the generation.
         """
 
-        models = self._population_asses(x_train, y_train, x_test, y_test, epochs)
+        models = self._population_asses(data)
 
-        generation_data = [
+        self.data += [
             [chromosome, chromosome.loss, chromosome.metric, generation]
             for chromosome in self.population
         ]
 
-        self.data += generation_data
+        prev_population = self.population
 
         self.population, self.elite_models = self.elitism(
-            generation_data=generation_data,
+            population=self.population,
             elitism_size=self.elitism_size,
             models=models,
         )
 
         while len(self.population) < self.pop_size:
+            parent1, parent2 = self.operations.selection(prev_population)
 
-            for operation in self.operations.get_operations():
-                if operation == 'selection':
-                    self.operations
-                    parent1, parent2 = getattr(self.operations, operation)(
-                        generation_data=generation_data,
-                    )
+            offspring = self.operations.crossover(
+                parents=(parent1, parent2), strategy=self.strategy
+            )
 
-                if operation == 'crossover':
-                    offspring = getattr(self.operations, operation)(
-                        parent1=parent1,
-                        parent2=parent2,
-                        strategy=self.strategy,
-                    )
-
-                if operation == 'mutation':
-                    mutated_offspring = getattr(self.operations, operation)(
-                        offspring=offspring,
-                        learnable_parameters=self.strategy.learnable_parameters
-                    )
+            mutated_offspring = self.operations.mutation(
+                offspring=offspring, parameters=self.strategy.parameters
+            )
 
             self.population.append(mutated_offspring)
 
-        return min(generation_data, key=lambda x: x[1])
+        return self.get_min_fitness(prev_population)
 
-    def _population_asses(self, x_train, y_train, x_test, y_test, epochs):
+    def _population_asses(self, data):
         """
         Assess the population of chromosomes using the given strategy.
 
@@ -134,70 +125,70 @@ class EvolutionaryAlgorithmElitism:
         models = []
 
         if all(self.elite_models):
-
             for idx, chromosome in enumerate(self.population):
-
                 if idx > self.elitism_size - 1:
-
-                    model = self.model_asses(
-                        chromosome, x_train, y_train,
-                        x_test, y_test, epochs
+                    model = self.get_model_fitness(
+                        chromosome,
+                        data,
                     )
 
                     models.append(model)
 
                 else:
-
-                    self.model_asses_elite(idx, chromosome, x_test, y_test)
+                    self.get_elite_model_fitness(idx, chromosome, data)
                     models.append(self.elite_models[idx])
 
         else:
-
             for chromosome in self.population:
-                model = self.model_asses(
-                    chromosome, x_train, y_train,
-                    x_test, y_test, epochs
-                )
+                model = self.get_model_fitness(chromosome, data)
                 models.append(model)
 
         return models
 
-    def model_asses(self,
-                    chromosome: Union[MLPChromosome, Conv2DChromosome],
-                    x_train: npt.NDArray, y_train: npt.NDArray,
-                    x_test: npt.NDArray, y_test: npt.NDArray,
-                    epochs: int
-                    ):
-
-        model, loss, metric = self.strategy.asses(
-            x_train, y_train,
-            x_test, y_test,
-            chromosome, epochs,
+    def get_model_fitness(
+        self,
+        chromosome: Chromosome,
+        data: Tuple[tf.data.Dataset],
+    ):
+        model, loss, metric = chromosome.get_fitness(
+            self.strategy.parameters,
+            chromosome.genes,
+            data,
+            self.strategy.epochs,
+            self.strategy.callback,
         )
         chromosome.loss = loss
         chromosome.metric = metric
 
         return model
 
-    def model_asses_elite(self,
-                          idx: int, chromosome: Union[MLPChromosome, Conv2DChromosome],
-                          x_test: npt.NDArray, y_test: npt.NDArray):
+    def get_elite_model_fitness(
+        self,
+        idx: int,
+        chromosome: Chromosome,
+        data: Tuple[tf.data.Dataset],
+    ):
+        batch_size = chromosome.get_parameter(
+            "batch_size", self.strategy.parameters.get("batch_size"), chromosome.genes
+        )
 
-        mse, r_square = self.elite_models[idx].evaluate(x_test, y_test, verbose=0)
-        chromosome.loss = mse
-        chromosome.metric = r_square
+        _, _, test_data = data
+        loss, metric = self.elite_models[idx].evaluate(
+            test_data.batch(batch_size), verbose=0
+        )
 
-    def fit(self,
-            x_train: NDArray, y_train: NDArray,
-            x_test: NDArray, y_test: NDArray, epochs: int,
-            generations: int
-            ):
+        chromosome.loss = loss
+        chromosome.metric = metric
 
+    def fit(
+        self,
+        data: Tuple[tf.data.Dataset],
+        generations: int,
+    ):
         self.population = self.strategy.generate_population(self.pop_size)
 
         for generation in range(generations):
-            best_chromosome = self.evolve_population(x_train, y_train, x_test, y_test, epochs, generation)
-            # if generation % 10 == 0 or generation == generations - 1:
+            best_chromosome = self.evolve_population(data, generation)
             print(
-                f'Generation {generation}, Best error: {best_chromosome[1]}, Best R2 {best_chromosome[2]}'
+                f"Generation {generation}, Best error: {best_chromosome.loss}, Best R2 {best_chromosome.metric}"
             )

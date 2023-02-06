@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Tuple
 import tensorflow as tf
 import tensorflow_addons as tfa
 
@@ -11,7 +11,6 @@ class Chromosome(ABC):
     Abstract class for chromosomes
         implements abstract methods for:
             - decode
-
         implements methods for:
             - get_unique_key -> str
             -  get_parameter -> Any
@@ -80,12 +79,11 @@ class Chromosome(ABC):
         self,
         learnable_parameters: dict,
         genes: list,
-        train_data: tf.data.Dataset,
-        valid_data: tf.data.Dataset,
-        test_data: tf.data.Dataset,
+        data: Tuple[tf.data.Dataset],
         epochs,
         callback: object,
     ):
+        train_data, valid_data, test_data = data
         model = self.build_and_compile_model(learnable_parameters, genes)
 
         batch_size = self.get_parameter(

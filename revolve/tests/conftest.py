@@ -1,6 +1,5 @@
 import pytest
 import itertools
-import tensorflow as tf
 from unittest.mock import MagicMock, Mock
 from revolve.architectures.mlp_chromosome import MLPChromosome
 from revolve.architectures.conv2d_chromosome import Conv2DChromosome
@@ -91,15 +90,19 @@ def conv_network_params(mlp_params, conv_learnable_params):
 def mlp_strategy_params():
     return {
         "max_fc": 3,
+        "epochs": 10,
         "callback": MagicMock(),
         "loss": MagicMock(),
         "metric": MagicMock(),
     }
 
+
 @pytest.fixture
 def conv_strategy_params():
     return {
         "max_conv": 3,
+        "max_fc": 2,
+        "epochs": 10,
         "callback": MagicMock(),
         "loss": MagicMock(),
         "metric": MagicMock(),
@@ -134,7 +137,7 @@ def mlp_chromosome_fc_only_genes(fc_gene_params, parameter_gene_params):
 
 @pytest.fixture
 def conv_chromosome_fc_conv_only_genes(
-        fc_gene_params, conv_gene_params, parameter_gene_params
+    fc_gene_params, conv_gene_params, parameter_gene_params
 ):
     conv_genes = [Conv2DGene(**conv_gene_params) for _ in range(3)]
     fc_genes = [FCGene(**fc_gene_params) for _ in range(3)]
@@ -153,17 +156,23 @@ def conv2d_chromosome(conv_chromosome_genes):
 
 @pytest.fixture
 def mock_data():
-    return MagicMock, MagicMock, MagicMock
+    train_data = MagicMock()
+    valid_data = MagicMock()
+    test_data = MagicMock()
+    train_data.batch.return_value = "train_batch"
+    valid_data.batch.return_value = "valid_batch"
+    test_data.batch.return_value = "test_batch"
+    return train_data, valid_data, test_data
 
 
 @pytest.fixture
 def mlp_strategy(mlp_params, mlp_strategy_params):
     return MLPStrategy(mlp_params, **mlp_strategy_params)
 
-@pytest.fixture
-def conv_strategy(conv_network_params, conv_strategy_params):
-    return Conv2DStrategy(conv_network_params, **conv_strategy_params)
 
+@pytest.fixture
+def conv2d_strategy(conv_network_params, conv_strategy_params):
+    return Conv2DStrategy(conv_network_params, **conv_strategy_params)
 
 
 if __name__ == "__main__":

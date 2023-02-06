@@ -1,53 +1,82 @@
 import pytest
 from unittest import mock
-from revolve.architectures import MLPStrategy, MLPChromosome, Conv2DChromosome
-from revolve.architectures import FCGene, ParameterGene
+from revolve.architectures import (
+    MLPStrategy,
+    MLPChromosome,
+    Conv2DChromosome,
+    Conv2DStrategy,
+)
+from revolve.architectures import FCGene, ParameterGene, Conv2DGene
 
 
 @pytest.mark.parametrize(
-    "params, strategy_params",
+    "strategy, params, strategy_params",
     [
         (
+            MLPStrategy,
             "mlp_params",
             {
                 "max_fc": 1,
+                "epochs": 10,
                 "callback": mock.MagicMock(),
                 "loss": "mean_squared_error",
                 "metric": "mean_absolute_error",
             },
         ),
         (
+            MLPStrategy,
             "mlp_params",
             {
                 "max_fc": 1,
+                "epochs": 10,
                 "callback": mock.MagicMock(),
                 "loss": mock.MagicMock(),
                 "metric": mock.MagicMock(),
             },
         ),
+        (
+            Conv2DStrategy,
+            "conv_network_params",
+            {
+                "max_fc": 1,
+                "max_conv": 1,
+                "epochs": 10,
+                "callback": mock.MagicMock(),
+                "loss": mock.MagicMock(),
+                "metric": mock.MagicMock(),
+            },
+        ),
+        (
+            Conv2DStrategy,
+            "conv_network_params",
+            {
+                "max_fc": 1,
+                "max_conv": 1,
+                "epochs": 10,
+                "callback": mock.MagicMock(),
+                "loss": "mean_squared_error",
+                "metric": "mean_absolute_error",
+            },
+        ),
     ],
 )
-def test_strategy_init(params, strategy_params, request):
+def test_strategy_init(strategy, params, strategy_params, request):
     params = request.getfixturevalue(params)
-    mlp_strategy = MLPStrategy(
-        parameters=params,
-        max_fc=strategy_params["max_fc"],
-        callback=strategy_params["callback"],
-        loss=strategy_params["loss"],
-        metric=strategy_params["metric"],
-    )
-    assert mlp_strategy.max_fc == strategy_params["max_fc"]
-    assert mlp_strategy.callback == strategy_params["callback"]
-    assert mlp_strategy.loss == strategy_params["loss"] or mock.MagicMock()
-    assert mlp_strategy.metric == strategy_params["metric"] or mock.MagicMock()
-    assert mlp_strategy.parameters == params
+    strategy = strategy(parameters=params, **strategy_params)
+    for key in strategy.__dict__.keys():
+        if key == "parameters":
+            assert isinstance(getattr(strategy, key), dict)
+        elif key is "loss" or "metric":
+            assert getattr(strategy, key) == strategy_params[key] or mock.MagicMock()
+        else:
+            assert getattr(strategy, key) == strategy_params[key]
 
 
 @pytest.mark.parametrize(
     "strategy, chromosome_genes, expected_chromosome",
     [
         ("mlp_strategy", "mlp_chromosome_genes", MLPChromosome),
-        ("conv2d_strategy", "conv_chromosome_genes", Conv2DChromosome)
+        ("conv2d_strategy", "conv_chromosome_genes", Conv2DChromosome),
     ],
 )
 def test_create_new_chromosome(
@@ -64,6 +93,8 @@ def test_create_new_chromosome(
     [
         ("mlp_strategy", "batch_size"),
         ("mlp_strategy", "regression_activation"),
+        ("conv2d_strategy", "batch_size"),
+        ("conv2d_strategy", "regression_activation"),
     ],
 )
 def test_parameter_choice(strategy, param, request):
@@ -73,19 +104,50 @@ def test_parameter_choice(strategy, param, request):
 
 
 @pytest.mark.parametrize(
-    "strategy, population_size, expected_population_size",
+    "strategy, population_size, expected_population_size, expected_genes, expected_chromosome",
     [
-        ("mlp_strategy", 100, 100),  # Test with valid input
-        ("mlp_strategy", 0, 0),  # Test with input 0
+        (
+            "mlp_strategy",
+            100,
+            100,
+            (FCGene, ParameterGene),
+            MLPChromosome,
+        ),  # Test with valid input
+        (
+            "mlp_strategy",
+            0,
+            0,
+            (FCGene, ParameterGene),
+            MLPChromosome,
+        ),  # Test with input 0
+        (
+            "conv2d_strategy",
+            100,
+            100,
+            (Conv2DGene, FCGene, ParameterGene),
+            Conv2DChromosome,
+        ),  # Test with valid input
+        (
+            "conv2d_strategy",
+            0,
+            0,
+            (Conv2DGene, FCGene, ParameterGene),
+            Conv2DChromosome,
+        ),  # Test with input 0
     ],
 )
 def test_generate_population(
-    strategy, population_size, expected_population_size, request
+    strategy,
+    population_size,
+    expected_population_size,
+    expected_genes,
+    expected_chromosome,
+    request,
 ):
     strategy = request.getfixturevalue(strategy)
     population = strategy.generate_population(population_size)
     assert len(population) == expected_population_size
     for chromosome in population:
-        assert isinstance(chromosome, MLPChromosome)
+        assert isinstance(chromosome, expected_chromosome)
         for gene in chromosome.genes:
-            assert isinstance(gene, (FCGene, ParameterGene))
+            assert isinstance(gene, expected_genes)

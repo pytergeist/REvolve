@@ -1,9 +1,10 @@
 from dataclasses import dataclass
 from typing import Union, List
+from .base import ParameterGrid
 
 
 @dataclass
-class FCParameterGrid:
+class MLPParameterGrid(ParameterGrid):
     # possible learnable architecture parameter definitions
     hidden_neurons: Union[List[int], int]
     activation: Union[List[str], str]
@@ -20,22 +21,3 @@ class FCParameterGrid:
     input_shape: tuple
     regression_target: int = 1
     regression_activation: str = "relu"
-
-    def get(self, parameter_name):
-        return getattr(self, parameter_name)
-
-    @property
-    def learnable_parameters(self):
-        return [
-            (key, self.__dict__[key])
-            for key in self.__dict__
-            if isinstance(self.__dict__[key], list)
-        ]
-
-    @property
-    def static_parameters(self):
-        return [
-            (key, self.__dict__[key])
-            for key in self.__dict__
-            if not isinstance(self.__dict__[key], list)
-        ]

@@ -36,10 +36,9 @@ class Strategy(ABC):
     def generate_population(self, population_size: int):  # pragma: no cover
         pass
 
-    def conv_block(self, gene: Callable, gene_type: str, max_conv: int):
+    def conv_block(self, gene: Callable, max_conv: int):
         return [
             gene(
-                gene_type=gene_type,
                 filters=self.parameter_choice("filters"),
                 kernel_size=self.parameter_choice("kernel_size"),
                 stride=self.parameter_choice("stride"),

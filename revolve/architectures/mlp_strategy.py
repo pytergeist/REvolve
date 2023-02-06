@@ -15,11 +15,15 @@ class MLPStrategy(Strategy):
         self,
         parameters: dataclass,
         max_fc: int = 3,
-        callback: tf.keras.callbacks.Callback = tf.keras.callbacks.EarlyStopping(),
+        epochs: int = 100,
+        callback: tf.keras.callbacks.Callback = None,
         loss: Union[tf.keras.losses.Loss, str] = tf.keras.losses.MeanSquaredError(),
-        metric: Union[tf.keras.metrics.Metric, str] = tfa.metrics.RSquare(),
+        metric: Union[
+            tf.keras.metrics.Metric, str
+        ] = tf.keras.metrics.MeanAbsoluteError(),
     ):
         self.max_fc = max_fc
+        self.epochs = epochs
         self.callback = callback
 
         if isinstance(loss, str):

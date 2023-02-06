@@ -1,14 +1,13 @@
 import random
-from typing import Union
-from revolve.architectures.chromosomes import MLPChromosome, Conv2DChromosome
-from revolve.architectures.strategies import MLPStrategy, Conv2DStrategy
+from typing import Tuple
+from revolve.architectures.base import Chromosome, Strategy
 
 
 def uniform_crossover(
-        parent1: Union[MLPChromosome, Conv2DChromosome],
-        parent2: Union[MLPChromosome, Conv2DChromosome],
-        probability: float, strategy: Union[MLPStrategy, Conv2DStrategy]
-        ) -> object:
+    parents: Tuple[Chromosome],
+    probability: float,
+    strategy: Strategy,
+) -> object:
     """
     Performs uniform crossover on the given parents to produce an offspring.
 
@@ -19,6 +18,8 @@ def uniform_crossover(
     Returns:
     list: The offspring produced by the crossover.
     """
+
+    parent1, parent2 = parents
 
     offspring = []
     for i in range(len(parent1.genes)):

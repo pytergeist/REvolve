@@ -2,7 +2,7 @@ import random
 from typing import Tuple
 
 
-def tournament_selection(generation_data, size: int) -> Tuple:
+def tournament_selection(population, size: int) -> Tuple:
     """
     Selects two parents for breeding using tournament selection.
 
@@ -12,15 +12,15 @@ def tournament_selection(generation_data, size: int) -> Tuple:
     Returns:
     Tuple: A tuple of the two selected parents.
     """
-
-    competitors = [random.choice(generation_data) for _ in range(size)]
+    fitness = [(chromosome, chromosome.loss) for chromosome in population]
+    competitors = [random.choice(fitness) for _ in range(size)]
     parent1 = min(competitors, key=lambda x: x[1])
     competitors.remove(parent1)
     parent2 = min(competitors, key=lambda x: x[1])
     return parent1[0], parent2[0]
 
 
-def roulette_wheel_selection(generation_data) -> Tuple:
+def roulette_wheel_selection(population) -> Tuple:
     """
     Selects two parents for breeding using roulette wheel selection.
 
@@ -31,13 +31,13 @@ def roulette_wheel_selection(generation_data) -> Tuple:
     Tuple: A tuple of the two selected parents.
     """
 
-    total_fitness = sum(data[1] for data in generation_data)
+    total_fitness = sum(chromosome.loss for chromosome in population)
     wheel = []
     current = 0
 
-    for data in generation_data:
-        current += data[1]
-        wheel.append((data[0], current / total_fitness))
+    for chromosome in population:
+        current += chromosome.loss
+        wheel.append((chromosome, current / total_fitness))
 
     def binary_search(value):
         low, high = 0, len(wheel) - 1
@@ -53,34 +53,3 @@ def roulette_wheel_selection(generation_data) -> Tuple:
     parent2 = binary_search(random.uniform(0, 1))
 
     return parent1, parent2
-
-
-def stochastic_universal_selection(generation_data) -> Tuple:
-    """
-    Selects two parents for breeding using Stochastic Universal Sampling.
-
-    Parameters:
-    generation_data (list): The data for the current generation.
-
-    Returns:
-    Tuple: A tuple of the two selected parents.
-    """
-
-    total_fitness = sum(data[1] for data in generation_data)
-    step = total_fitness / len(generation_data)
-    start = random.uniform(0, step)
-    pointers = [start + i * step for i in range(len(generation_data))]
-    wheel = [(data[0], data[1]) for data in generation_data]
-    wheel.sort(key=lambda x: x[1])
-
-    selected = []
-    i = 0
-    for pointer in pointers:
-        while wheel[i][1] < pointer:
-            pointer -= wheel[i][1]
-            i += 1
-        selected.append(wheel[i][0])
-
-    parent1, parent2 = random.sample(selected, 2)
-    return parent1, parent2
-
