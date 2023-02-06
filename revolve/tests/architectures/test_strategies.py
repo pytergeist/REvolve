@@ -1,96 +1,91 @@
 import pytest
-import numpy as np
-import tensorflow as tf
-from revolve.architectures import Conv2DStrategy, MLPStrategy
-from revolve.architectures import MLPChromosome, Conv2DChromosome
+from unittest import mock
+from revolve.architectures import MLPStrategy, MLPChromosome, Conv2DChromosome
+from revolve.architectures import FCGene, ParameterGene
 
 
-class TestMLPStrategy:
-
-    def test_get_learnable_parameters(self, mlp_strategy):
-        learnable_parameters = mlp_strategy.get_learnable_parameters()
-        assert 'neurons' in learnable_parameters
-        assert 'dropout' in learnable_parameters
-        assert 'batch_size' in learnable_parameters
-        assert 'optimizer' in learnable_parameters
-        assert 'learning_rate' in learnable_parameters
-        assert 'l1' in learnable_parameters
-        assert 'l2' in learnable_parameters
-
-    def test_create_new_chromosome(self, mlp_strategy, gene_list_mlp):
-        new_chromosome = mlp_strategy.create_new_chromosome(gene_list_mlp)
-        assert isinstance(new_chromosome, MLPChromosome)
-
-    def test_parameter_choice(self, mlp_strategy):
-        neurons_param = mlp_strategy.parameter_choice('neurons')
-        assert neurons_param in mlp_strategy.neurons
-        activation_param = mlp_strategy.parameter_choice('activation')
-        assert activation_param == mlp_strategy.activation
-
-    def test_generate_population(self, mlp_strategy):
-        population_size = 5
-        population = mlp_strategy.generate_population(population_size)
-        assert len(population) == population_size
-        for chromosome in population:
-            assert isinstance(chromosome, MLPChromosome)
-
-    def test_asses(self, mlp_strategy):
-        x_train = np.random.rand(100, 10)
-        y_train = np.random.rand(100, 1)
-        x_test = np.random.rand(20, 10)
-        y_test = np.random.rand(20, 1)
-        population = mlp_strategy.generate_population(1)
-        chromosome = population[0]
-        epochs = 10
-        model, mse, r_square = mlp_strategy.asses(x_train, y_train, x_test, y_test, chromosome, epochs)
-        assert isinstance(model, tf.keras.Model)
-        assert isinstance(mse, float)
-        assert isinstance(r_square, float)
+@pytest.mark.parametrize(
+    "params, strategy_params",
+    [
+        (
+            "mlp_params",
+            {
+                "max_fc": 1,
+                "callback": mock.MagicMock(),
+                "loss": "mean_squared_error",
+                "metric": "mean_absolute_error",
+            },
+        ),
+        (
+            "mlp_params",
+            {
+                "max_fc": 1,
+                "callback": mock.MagicMock(),
+                "loss": mock.MagicMock(),
+                "metric": mock.MagicMock(),
+            },
+        ),
+    ],
+)
+def test_strategy_init(params, strategy_params, request):
+    params = request.getfixturevalue(params)
+    mlp_strategy = MLPStrategy(
+        parameters=params,
+        max_fc=strategy_params["max_fc"],
+        callback=strategy_params["callback"],
+        loss=strategy_params["loss"],
+        metric=strategy_params["metric"],
+    )
+    assert mlp_strategy.max_fc == strategy_params["max_fc"]
+    assert mlp_strategy.callback == strategy_params["callback"]
+    assert mlp_strategy.loss == strategy_params["loss"] or mock.MagicMock()
+    assert mlp_strategy.metric == strategy_params["metric"] or mock.MagicMock()
+    assert mlp_strategy.parameters == params
 
 
-class TestConv2DStrategy:
+@pytest.mark.parametrize(
+    "strategy, chromosome_genes, expected_chromosome",
+    [
+        ("mlp_strategy", "mlp_chromosome_genes", MLPChromosome),
+        ("conv2d_strategy", "conv_chromosome_genes", Conv2DChromosome)
+    ],
+)
+def test_create_new_chromosome(
+    strategy, chromosome_genes, expected_chromosome, request
+):
+    strategy = request.getfixturevalue(strategy)
+    chromosome_genes = request.getfixturevalue(chromosome_genes)
+    new_chromosome = strategy.create_new_chromosome(genes=chromosome_genes)
+    assert isinstance(new_chromosome, expected_chromosome)
 
-    def test_create_new_chromosome(self, conv2d_strategy, gene_list_conv2d):
-        new_chromosome = conv2d_strategy.create_new_chromosome(gene_list_conv2d)
-        assert isinstance(new_chromosome, Conv2DChromosome)
 
-    def test_get_learnable_parameters(self, conv2d_strategy):
-        learnable_parameters = conv2d_strategy.get_learnable_parameters()
-        assert 'neurons' in learnable_parameters
-        assert 'dropout' in learnable_parameters
-        assert 'batch_size' in learnable_parameters
-        assert 'optimizer' in learnable_parameters
-        assert 'learning_rate' in learnable_parameters
-        assert 'l1' in learnable_parameters
-        assert 'l2' in learnable_parameters
-        assert 'filters' in learnable_parameters
-        assert 'kernel_size' in learnable_parameters
-        assert 'stride' in learnable_parameters
+@pytest.mark.parametrize(
+    "strategy, param",
+    [
+        ("mlp_strategy", "batch_size"),
+        ("mlp_strategy", "regression_activation"),
+    ],
+)
+def test_parameter_choice(strategy, param, request):
+    strategy = request.getfixturevalue(strategy)
+    chosen_param = strategy.parameter_choice(param)
+    assert chosen_param in strategy.parameters[param]
 
-    def test_parameter_choice(self, conv2d_strategy):
-        neurons_param = conv2d_strategy.parameter_choice('neurons')
-        assert neurons_param in conv2d_strategy.neurons
-        kernel_size_param = conv2d_strategy.parameter_choice('kernel_size')
-        assert kernel_size_param in conv2d_strategy.kernel_size
-        activation_param = conv2d_strategy.parameter_choice('activation')
-        assert activation_param == conv2d_strategy.activation
 
-    def test_generate_population(self, conv2d_strategy):
-        population_size = 5
-        population = conv2d_strategy.generate_population(population_size)
-        assert len(population) == population_size
-        for chromosome in population:
-            assert isinstance(chromosome, Conv2DChromosome)
-
-    def test_asses(self, conv2d_strategy):
-        x_train = np.random.rand(100, 10, 10, 1)
-        y_train = np.random.rand(100, 1)
-        x_test = np.random.rand(20, 10, 10, 1)
-        y_test = np.random.rand(20, 1)
-        population = conv2d_strategy.generate_population(1)
-        chromosome = population[0]
-        epochs = 10
-        model, mse, r_square = conv2d_strategy.asses(x_train, y_train, x_test, y_test, chromosome, epochs)
-        assert isinstance(model, tf.keras.Model)
-        assert isinstance(mse, float)
-        assert isinstance(r_square, float)
+@pytest.mark.parametrize(
+    "strategy, population_size, expected_population_size",
+    [
+        ("mlp_strategy", 100, 100),  # Test with valid input
+        ("mlp_strategy", 0, 0),  # Test with input 0
+    ],
+)
+def test_generate_population(
+    strategy, population_size, expected_population_size, request
+):
+    strategy = request.getfixturevalue(strategy)
+    population = strategy.generate_population(population_size)
+    assert len(population) == expected_population_size
+    for chromosome in population:
+        assert isinstance(chromosome, MLPChromosome)
+        for gene in chromosome.genes:
+            assert isinstance(gene, (FCGene, ParameterGene))

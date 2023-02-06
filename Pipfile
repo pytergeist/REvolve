@@ -7,16 +7,20 @@ name = "pypi"
 numpy = "*"
 pandas = "*"
 h5py = "*"
+tensorflow = {version = "*", sys_platform = "== 'linux'"}
 
 [dev-packages]
 jupyter = "*"
 tensorflow-addons = "*"
 scikit-learn = "*"
-tensorflow-macos = "*"
+tensorflow-macos = {version = "*", sys_platform = "== 'darwin'"}
 pytest = "*"
 pytest-cov = "*"
 circleci = "*"
 mypy = "*"
+black = "*"
+pylint = "*"
+pytest-lazy-fixture = "*"
 
 [requires]
 python_version = "3.9"

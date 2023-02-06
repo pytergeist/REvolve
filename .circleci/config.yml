@@ -10,7 +10,7 @@ jobs:
     steps:
       - checkout
       - python/install-packages:
-          args: pytest tensorflow tensorflow_addons
+          args: pytest --cov tensorflow tensorflow_addons
           pkg-manager: pipenv
       - run:
           command: |
@@ -25,7 +25,7 @@ jobs:
     steps:
       - checkout
       - python/install-packages:
-          args: pytest tensorflow tensorflow_addons
+          args: pytest pytest-cov tensorflow tensorflow_addons
           pkg-manager: pipenv
       - run:
           command: |

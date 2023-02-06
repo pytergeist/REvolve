@@ -2,7 +2,11 @@ import pytest
 from typing import List, Tuple
 from random import seed
 from revolve.architectures import MLPChromosome, Conv2DChromosome
-from revolve.algorithms.evolutionary_orperations import mutation, tournament_selection, uniform_crossover
+from revolve.algorithms.evolutionary_orperations import (
+    mutation,
+    tournament_selection,
+    uniform_crossover,
+)
 
 
 def test_tournament_selection(generation_data):
@@ -36,4 +40,3 @@ def test_uniform_crossover_conv2d(conv2d_models, conv2d_strategy):
 #     mutation(offspring, 0.5, learnable_parameters)
 #     for i in offspring.genes:
 #         assert i in learnable_parameters
-
