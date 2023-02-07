@@ -1,6 +1,6 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import Tuple, List
+from typing import Tuple
 from revolve.architectures.base import BaseChromosome
 import tensorflow as tf
 import numpy as np

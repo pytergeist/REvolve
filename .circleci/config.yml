@@ -4,6 +4,7 @@ orbs:
   python: circleci/python@2.1.1
 
 jobs:
+
   build-and-test-algorithms:
     docker:
       - image: cimg/python:3.9
@@ -36,7 +37,7 @@ jobs:
           name: Test architectures
 
 
-    build-and-test-grids:
+  build-and-test-grids:
     docker:
       - image: cimg/python:3.9
     steps:
@@ -52,7 +53,7 @@ jobs:
           name: Test grids
 
 
-    build-and-test-operators:
+  build-and-test-operators:
     docker:
       - image: cimg/python:3.9
     steps:
