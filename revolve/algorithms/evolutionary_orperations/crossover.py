@@ -1,13 +1,13 @@
 import random
 from typing import Tuple
-from revolve.architectures.base import Chromosome, Strategy
+from copy import deepcopy
+from revolve.architectures.base import Chromosome
 
 
 def uniform_crossover(
     parents: Tuple[Chromosome],
     probability: float,
-    strategy: Strategy,
-) -> object:
+) -> Chromosome:
     """
     Performs uniform crossover on the given parents to produce an offspring.
 
@@ -21,11 +21,11 @@ def uniform_crossover(
 
     parent1, parent2 = parents
 
-    offspring = []
-    for i in range(len(parent1.genes)):
-        if random.random() < probability:
-            offspring.append(parent1.genes[i])
-        else:
-            offspring.append(parent2.genes[i])
+    offspring = deepcopy(parent1)
 
-    return strategy.create_new_chromosome(genes=offspring)
+    offspring.genes = [
+        parent1.genes[i] if random.random() < probability else parent2.genes[i]
+        for i in range(len(parent1.genes))
+    ]
+
+    return offspring

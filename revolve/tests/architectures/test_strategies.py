@@ -66,7 +66,7 @@ def test_strategy_init(strategy, params, strategy_params, request):
     for key in strategy.__dict__.keys():
         if key == "parameters":
             assert isinstance(getattr(strategy, key), dict)
-        elif key is "loss" or "metric":
+        elif key == "loss" or "metric":
             assert getattr(strategy, key) == strategy_params[key] or mock.MagicMock()
         else:
             assert getattr(strategy, key) == strategy_params[key]

@@ -191,7 +191,7 @@ def test_get_elite_model_fitness(strategy, data, request):
     "strategy, mock_data",
     [
         ("mlp_strategy", "mock_data"),
-        ("conv2d_strategy", "mock_data"),
+        ("conv2d" "_strategy", "mock_data"),
     ],
 )
 def test_fit(strategy, mock_data, request):
