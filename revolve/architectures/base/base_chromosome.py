@@ -63,23 +63,13 @@ class BaseChromosome(ABC):
 
     @staticmethod
     def fit_model(model, train_data, valid_data, epochs, batch_size, callback):
-        try:
-            model.fit(
-                train_data.batch(batch_size),
-                epochs=epochs,
-                validation_data=valid_data.batch(batch_size),
-                callbacks=[callback],
-                verbose=0,
-            )
-        except Exception as e:
-            import pickle
-
-            with open(
-                "/Users/tompope/Documents/python_enviroment/SoftwareDevelopment/REvolve/revolve/model.pkl",
-                "wb",
-            ) as f:
-                pickle.dump(model, f)
-                print(e)
+        model.fit(
+            train_data.batch(batch_size),
+            epochs=epochs,
+            validation_data=valid_data.batch(batch_size),
+            callbacks=[callback],
+            verbose=0,
+        )
 
     @staticmethod
     def evaluate_model(model, test_data, batch_size):
