@@ -4,6 +4,16 @@ from revolve.architectures.base import BaseGene
 
 
 class FCGene(BaseGene):
+    """
+    FCGene is a sub-class of BaseGene which represents an FC layer in an MLP/CONV model.
+
+    :param hidden_neurons: (int) The number of hidden_neurons.
+    :param activation: (str) The activation function to use.
+    :param dropout: (float) the dropout probability.
+    :param l1: (float) l1 regularization coefficient
+    :param l2: (float) l2 regularization coefficient
+    """
+
     def __init__(
         self,
         hidden_neurons: int,
@@ -26,6 +36,9 @@ class FCGene(BaseGene):
         self._validate_params()
 
     def _validate_params(self):
+        """
+        Internal method to validate the parameters passed to the constructor.
+        """
         assert isinstance(
             self.parameters["hidden_neurons"], int
         ), f"invalid number of logits: {self.hidden_neurons}"

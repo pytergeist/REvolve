@@ -2,7 +2,7 @@ import random
 from revolve.architectures.base import BaseChromosome
 
 
-def mutation(
+def random_mutation(
     offspring: BaseChromosome,
     probability: float,
     parameters: dict,

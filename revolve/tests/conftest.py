@@ -87,6 +87,7 @@ def conv_network_params(mlp_params, conv_learnable_params):
 def mlp_strategy_params():
     return {
         "max_fc": 3,
+        "squeeze_fc": True,
         "epochs": 10,
         "callback": mock.MagicMock(),
         "loss": mock.MagicMock(),
@@ -98,7 +99,9 @@ def mlp_strategy_params():
 def conv_strategy_params():
     return {
         "max_conv": 3,
+        "expand_conv": True,
         "max_fc": 2,
+        "squeeze_fc": True,
         "epochs": 10,
         "callback": mock.MagicMock(),
         "loss": mock.MagicMock(),

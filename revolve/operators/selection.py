@@ -7,7 +7,8 @@ def tournament_selection(population, size: int) -> Tuple:
     Selects two parents for breeding using tournament selection.
 
     Parameters:
-    generation_data (list): The data for the current generation.
+    population (list): The population for the current generation.
+    size: (int): size of tournament
 
     Returns:
     Tuple: A tuple of the two selected parents.
@@ -25,7 +26,7 @@ def roulette_wheel_selection(population) -> Tuple:
     Selects two parents for breeding using roulette wheel selection.
 
     Parameters:
-    generation_data (list): The data for the current generation.
+    population (list): The popualtion for the current generation.
 
     Returns:
     Tuple: A tuple of the two selected parents.

@@ -4,28 +4,36 @@ from revolve.architectures.base import BaseChromosome
 
 
 class MLPChromosome(BaseChromosome):
-    """
-    Class to store MLP layers and param genes as chromosome list
-    Methods:
-        decode:
-            decodes chromosome into keras model
-            return - tf.keras.Model
-    """
-
     def __init__(
         self,
         genes: list,
         loss: Optional[float] = None,
         metric: Optional[float] = None,
     ):
+        """
+        Initialize a MLPChromosome with genes, loss and metric values.
+
+
+        Attributes:
+        genes (list): List of genes.
+        loss (float, optional): Loss value. Defaults to None.
+        metric (float, optional): Metric value. Defaults to None.
+
+        """
         self.genes = genes
         self.loss = loss
         self.metric = metric
 
     def decode(self, learnable_params) -> tf.keras.Model:
         """
-        decode encoded neural network architecture and return model
-        :return: sequential keras model
+        Decode the chromosome into a TensorFlow model.
+
+        Args:
+        learnable_params (dict): Learnable parameters for the model.
+
+        Returns:
+        tf.keras.Model: The decoded TensorFlow model.
+
         """
 
         _inputs = tf.keras.Input(shape=learnable_params.get("input_shape"))

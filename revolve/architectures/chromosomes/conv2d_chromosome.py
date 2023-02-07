@@ -5,11 +5,16 @@ from revolve.architectures.base import BaseChromosome
 
 class Conv2DChromosome(BaseChromosome):
     """
-    Class to store MLP layers and param genes as chromosome list
-    Methods:
-        decode:
-            decodes chromosome into keras model
-            return - tf.keras.Model
+    Subclass of BaseChromosome for storing and assesing 2D-convolution networks
+
+    Attributes:
+    genes (BaseGene): a list of gene objects containing paramaters for conv2d/fc/parameter-genes
+    loss: chosen loss from chromosome
+    metric: chosen metric for chromosome
+
+    methods:
+        decode(learnable_parameters: dict) - method to decode 2D convolution architecture and return keras model
+
     """
 
     def __init__(
@@ -18,15 +23,32 @@ class Conv2DChromosome(BaseChromosome):
         loss: Optional[float] = None,
         metric: Optional[float] = None,
     ):
+        """
+        Initialize a Conv2DChromosome object.
+
+        Arguments:
+        - genes: list of gene objects
+        - loss: a float representing the loss (default None)
+        - metric: a float representing the metric (default None)
+
+        Returns:
+        None
+        """
         self.genes = genes
         self.loss = loss
         self.metric = metric
 
     def decode(self, learnable_parameters: dict) -> tf.keras.Sequential:
         """
-        decode encoded neural network architecture and return model
-        :return: sequential keras model
+        Decode the genes into a Keras model.
+
+        Arguments:
+        - learnable_parameters: dictionary containing parameters for model creation
+
+        Returns:
+        - Keras model
         """
+
         _inputs = tf.keras.Input(shape=learnable_parameters.get("input_shape"))
 
         x = tf.keras.layers.Conv2D(

@@ -5,6 +5,11 @@ from .base import ParameterGrid
 
 @dataclass
 class ConvParameterGrid(ParameterGrid):
+    """
+    Subclass of Parameter grid that holds learnable/static hyper-parameters
+    for convolution neural networks
+    """
+
     # always static parameter definitions
     input_shape: tuple
     regression_target: int

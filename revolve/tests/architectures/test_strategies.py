@@ -13,6 +13,7 @@ from revolve.architectures.genes import FCGene, ParameterGene, Conv2DGene
             "mlp_params",
             {
                 "max_fc": 1,
+                "squeeze_fc": True,
                 "epochs": 10,
                 "callback": mock.MagicMock(),
                 "loss": "mean_squared_error",
@@ -24,6 +25,7 @@ from revolve.architectures.genes import FCGene, ParameterGene, Conv2DGene
             "mlp_params",
             {
                 "max_fc": 1,
+                "squeeze_fc": True,
                 "epochs": 10,
                 "callback": mock.MagicMock(),
                 "loss": mock.MagicMock(),
@@ -35,7 +37,9 @@ from revolve.architectures.genes import FCGene, ParameterGene, Conv2DGene
             "conv_network_params",
             {
                 "max_fc": 1,
+                "squeeze_fc": True,
                 "max_conv": 1,
+                "expand_conv": True,
                 "epochs": 10,
                 "callback": mock.MagicMock(),
                 "loss": mock.MagicMock(),
@@ -47,7 +51,9 @@ from revolve.architectures.genes import FCGene, ParameterGene, Conv2DGene
             "conv_network_params",
             {
                 "max_fc": 1,
+                "squeeze_fc": True,
                 "max_conv": 1,
+                "expand_conv": True,
                 "epochs": 10,
                 "callback": mock.MagicMock(),
                 "loss": "mean_squared_error",

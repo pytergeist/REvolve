@@ -1,6 +1,6 @@
 import pytest
 from copy import deepcopy
-from revolve.operators import mutation
+from revolve.operators import random_mutation
 from revolve.architectures.chromosomes import MLPChromosome, Conv2DChromosome
 
 
@@ -15,7 +15,7 @@ def test_mutation(chromosome, parameters, expected_chromosome, request):
     chromosome = request.getfixturevalue(chromosome)
     parameters = request.getfixturevalue(parameters)
     original_chromosome = deepcopy(chromosome)
-    offspring = mutation(chromosome, 1.0, parameters)
+    offspring = random_mutation(chromosome, 1.0, parameters)
 
     for gene, original_gene in zip(offspring.genes, original_chromosome.genes):
         for param, value in gene.parameters.items():

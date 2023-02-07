@@ -8,16 +8,18 @@ from .base import BaseEvolutionaryAlgorithm
 
 class EvolutionaryAlgorithmElitism(BaseEvolutionaryAlgorithm):
     """
-    Class that implements a genetic algorithm with elitism.
-
-    Parameters:
-    strategy (object): The strategy class object that will be used to assess the population.
-    parameters (Dict[float, int]): A dictionary of parameters for the algorithm.
+    A subclass of `BaseEvolutionaryAlgorithm` implementing an elitism approach to evolve population.
 
     Attributes:
-    data (list): The data collected for each generation.
-    architectures (list): The architectures generated for each generation.
-    population (list): The population of chromosomes for the current generation.
+    strategy (BaseStrategy): An object of `BaseStrategy` class representing the strategy for the model.
+    pop_size (int): An integer representing the size of population.
+    elitism_size (int): An integer representing the number of models to be carried over from previous generation.
+    data (List[list]): A list of lists representing the data of each chromosome.
+    elite_models (List[None or Model]): A list of model objects representing the top models from previous generations.
+    population (List[BaseStrategy]): A list of objects of `BaseStrategy` class representing the population.
+    operations (object): An object containing operations such as selection, crossover and mutation to be performed
+    on population.
+
     """
 
     def __init__(
@@ -27,22 +29,28 @@ class EvolutionaryAlgorithmElitism(BaseEvolutionaryAlgorithm):
         elitism_size: int,
         operations: object,
     ):
+        """
+        Initializes the object of class `EvolutionaryAlgorithmElitism`
+
+        Arguments:
+        strategy (BaseStrategy): An object of `BaseStrategy` class representing the strategy for the model.
+        pop_size (int): An integer representing the size of population.
+        elitism_size (int): An integer representing the number of models to be carried over from previous generation.
+        operations (object): An object containing operations such as selection, crossover and mutation to be performed on population.
+
+        """
         self.strategy = strategy
         self.pop_size = pop_size
         self.elitism_size = elitism_size
         self.data: List[list] = []
         self.elite_models = [None] * elitism_size
-        self.population: List[BaseStrategy] = []
+        self.population: List[BaseChromosome] = []
         self.operations = operations
 
     @staticmethod
-    def elitism(population: List, elitism_size: int, models: list):
-        """
-        Selects the elite individuals from the current generation.
-
-        Parameters:
-        generation_data (list): The data for the current generation.
-        """
+    def elitism(
+        population: List, elitism_size: int, models: list
+    ) -> Tuple[list[BaseChromosome], list[tf.keras.Model]]:
         elite_idx = np.argsort([chromosome.loss for chromosome in population])[
             :elitism_size
         ]
@@ -57,22 +65,18 @@ class EvolutionaryAlgorithmElitism(BaseEvolutionaryAlgorithm):
         self,
         data: Tuple[tf.data.Dataset],
         generation: int,
-    ) -> List:
+    ) -> BaseChromosome:
         """
-        Evolves the population of chromosomes for a given number of generations.
+        Function to evolve the population by applying selection, crossover and mutation operations.
 
-        Parameters:
-        x_train (NDArray): The training data.
-        y_train (NDArray): The target values for the training data.
-        x_test (NDArray): The test data.
-        y_test (NDArray): The target values for the test data.
-        epochs (int): The number of training epochs for each model.
-        generation (int): The current generation number.
+        Arguments:
+        data (Tuple[tf.data.Dataset]): A tuple containing the training, validation and testing data.
+        generation (int): An integer representing the current generation number.
 
         Returns:
-        List: A list containing the best chromosome for the generation.
-        """
+        Chromosome: The best chromosome from the population.
 
+        """
         models = self._population_asses(data)
 
         self.data += [
@@ -101,20 +105,16 @@ class EvolutionaryAlgorithmElitism(BaseEvolutionaryAlgorithm):
 
         return self.get_min_fitness(prev_population)
 
-    def _population_asses(self, data: Tuple[tf.data.Dataset]):
+    def _population_asses(self, data: Tuple[tf.data.Dataset]) -> List[tf.keras.Model]:
         """
-        Assess the population of chromosomes using the given strategy.
+        A helper function to evaluate the fitness of all models in population.
 
-        Parameters:
-        x_train (NDArray): The training data.
-        y_train (NDArray): The target values for the training data.
-        x_test (NDArray): The test data.
-        y_test (NDArray): The target values for the test data.
-        epochs (int): The number of training epochs for each model.
-        generation (int): The current generation number.
+        Arguments:
+        data (Tuple[tf.data.Dataset]): A tuple containing the training, validation and testing data.
 
         Returns:
-        List: A list containing the data for each chromosome in the population.
+        List: A list of all models from the current generation.
+
         """
         models = []
 
@@ -147,6 +147,15 @@ class EvolutionaryAlgorithmElitism(BaseEvolutionaryAlgorithm):
         chromosome: BaseChromosome,
         data: Tuple[tf.data.Dataset],
     ):
+        """
+        Evaluate the fitness of elite model from population and updates chromosome
+
+        Args:
+        idx (int): Index of the elite chromosome
+        chromosome (BaseChromosome): Elite chromosome to be updated
+        data (Tuple[tf.data.Dataset]): Tuple of data sets containing training, validation and test datasets.
+
+        """
         batch_size = chromosome.get_parameter(
             "batch_size", self.strategy.parameters.get("batch_size"), chromosome.genes
         )
@@ -164,6 +173,16 @@ class EvolutionaryAlgorithmElitism(BaseEvolutionaryAlgorithm):
         data: Tuple[tf.data.Dataset],
         generations: int,
     ):
+        """
+        Train the evolutionary algorithm for a specified number of generations.
+
+        Args:
+        - data (Tuple[tf.data.Dataset]): The dataset to use for training and testing the model.
+        - generations (int): The number of generations to evolve the population for.
+
+        Returns:
+        None
+        """
         self.population = self.strategy.generate_population(self.pop_size)
 
         for generation in range(generations):

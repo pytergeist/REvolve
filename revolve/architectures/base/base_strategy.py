@@ -11,20 +11,37 @@ import random
 
 class BaseStrategy(ABC):
     """
-    Abstract class for strategies
-        implements abstract methods for:
-            - create_new_chromosome
-            - get_learnable_parameters
-            - parameter_choice
-            - generate_population
-            - asses
+    This is an abstract base class for creating and generating a population of chromosomes.
+
+
+    Abstract methods:
+        create_new_chromosome(genes: list)
+        generate_population(population_size: int)
     """
 
     @abstractmethod
     def create_new_chromosome(self, genes: list):  # pragma: no cover
+        """
+        Create a new chromosome from a list of genes.
+
+        Args:
+            genes (list): A list of genes to create a new chromosome from.
+
+        Returns:
+            None
+        """
         pass
 
     def parameter_choice(self, parameter: Any):
+        """
+        Choose a random parameter from a list of available parameters.
+
+        Args:
+            parameter (Any): A parameter from which to choose from.
+
+        Returns:
+            Union[Any, int]: Returns a random parameter from a list, otherwise the original parameter.
+        """
         params = self.parameters.get(parameter)
 
         if isinstance(params, list):
@@ -34,9 +51,43 @@ class BaseStrategy(ABC):
 
     @abstractmethod
     def generate_population(self, population_size: int):  # pragma: no cover
+        """
+        Generate a population of chromosomes.
+
+        Args:
+            population_size (int): The number of chromosomes to generate.
+
+        Returns:
+            None
+        """
         pass
 
+    @staticmethod
+    def check_valid_architecture(chromosome, layer_param):
+        """
+        Check if the given chromosome architecture is valid, by ensuring the first layer
+        of the chromosome does not have 0 value for the logits/filters, ensuring valid decoding
+        of the chromosome
+
+        Parameters:
+        chromosome (Chromosome): The chromosome to check for validity.
+
+        Returns:
+        bool: True if the chromosome architecture is valid, False otherwise.
+        """
+        return getattr(chromosome.genes[0], layer_param) != 0
+
     def conv_block(self, gene: Callable, max_conv: int):
+        """
+        Create a convolutional block of layers.
+
+        Args:
+            gene (Callable): A callable function for creating a gene.
+            max_conv (int): The number of convolutional layers to create.
+
+        Returns:
+            list: A list of convolutional layers.
+        """
         return [
             gene(
                 filters=self.parameter_choice("filters"),
@@ -47,7 +98,25 @@ class BaseStrategy(ABC):
             for _ in range(max_conv)
         ]
 
+    @staticmethod
+    def squeeze_fc_neurons(fc_block):
+        return sorted(fc_block, key=lambda x: x.hidden_neurons, reverse=True)
+
+    @staticmethod
+    def expand_conv_filters(conv_block):
+        return sorted(conv_block, key=lambda x: x.filters, reverse=True)
+
     def fc_block(self, gene: Callable, max_fc: int):
+        """
+        Create a fully connected block of layers.
+
+        Args:
+            gene (Callable): A callable function for creating a gene.
+            max_fc (int): The number of fully connected layers to create.
+
+        Returns:
+            list: A list of fully connected layers.
+        """
         return [
             gene(
                 hidden_neurons=self.parameter_choice("hidden_neurons"),
@@ -60,6 +129,15 @@ class BaseStrategy(ABC):
         ]
 
     def parameter_block(self, gene: Callable):
+        """
+        Create a block of training parameters.
+
+        Args:
+            gene (Callable): A callable function for creating a gene.
+
+        Returns:
+            list: A list of training parameters.
+        """
         training_params = [
             "batch_size",
             "optimizer",

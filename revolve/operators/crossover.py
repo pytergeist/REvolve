@@ -12,8 +12,9 @@ def uniform_crossover(
     Performs uniform crossover on the given parents to produce an offspring.
 
     Parameters:
-    parent1 (list): The first parent.
-    parent2 (list): The second parent.
+    parent1 (BaseChromosome): The first parent.
+    parent2 (BaseChromosome): The second parent.
+    probability (float):
 
     Returns:
     list: The offspring produced by the crossover.
