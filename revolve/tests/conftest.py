@@ -1,12 +1,10 @@
 import pytest
 import itertools
-from unittest.mock import MagicMock, Mock
-from revolve.architectures.mlp_chromosome import MLPChromosome
-from revolve.architectures.conv2d_chromosome import Conv2DChromosome
-from revolve.architectures.mlp_strategy import MLPStrategy
-from revolve.architectures.conv_strategy import Conv2DStrategy
-from revolve.architectures import FCGene, Conv2DGene
-from revolve.architectures import ParameterGene
+from unittest import mock
+from revolve.architectures.chromosomes import MLPChromosome, Conv2DChromosome
+from revolve.architectures.strategies import MLPStrategy, Conv2DStrategy
+from revolve.architectures.genes import FCGene, Conv2DGene, ParameterGene
+from revolve.architectures.base import BaseChromosome
 
 
 @pytest.fixture
@@ -81,8 +79,7 @@ def conv_learnable_params():
 
 @pytest.fixture
 def conv_network_params(mlp_params, conv_learnable_params):
-    network_params = {**mlp_params, **conv_learnable_params}
-    network_params["input_shape"] = (10, 10, 1)
+    network_params = {**mlp_params, **conv_learnable_params, "input_shape": (10, 10, 1)}
     return network_params
 
 
@@ -91,9 +88,9 @@ def mlp_strategy_params():
     return {
         "max_fc": 3,
         "epochs": 10,
-        "callback": MagicMock(),
-        "loss": MagicMock(),
-        "metric": MagicMock(),
+        "callback": mock.MagicMock(),
+        "loss": mock.MagicMock(),
+        "metric": mock.MagicMock(),
     }
 
 
@@ -103,9 +100,9 @@ def conv_strategy_params():
         "max_conv": 3,
         "max_fc": 2,
         "epochs": 10,
-        "callback": MagicMock(),
-        "loss": MagicMock(),
-        "metric": MagicMock(),
+        "callback": mock.MagicMock(),
+        "loss": mock.MagicMock(),
+        "metric": mock.MagicMock(),
     }
 
 
@@ -156,9 +153,9 @@ def conv2d_chromosome(conv_chromosome_genes):
 
 @pytest.fixture
 def mock_data():
-    train_data = MagicMock()
-    valid_data = MagicMock()
-    test_data = MagicMock()
+    train_data = mock.MagicMock()
+    valid_data = mock.MagicMock()
+    test_data = mock.MagicMock()
     train_data.batch.return_value = "train_batch"
     valid_data.batch.return_value = "valid_batch"
     test_data.batch.return_value = "test_batch"
@@ -173,6 +170,32 @@ def mlp_strategy(mlp_params, mlp_strategy_params):
 @pytest.fixture
 def conv2d_strategy(conv_network_params, conv_strategy_params):
     return Conv2DStrategy(conv_network_params, **conv_strategy_params)
+
+
+@pytest.fixture
+def mlp_population(mlp_chromosome):
+    population = [mlp_chromosome for _ in range(10)]
+    for idx in range(len(population)):
+        population[idx].loss = float(idx)
+        population[idx].metric = float(idx)
+    return population
+
+
+@pytest.fixture
+def conv_population(conv2d_chromosome):
+    population = [conv2d_chromosome for _ in range(10)]
+    for idx, chromosome in enumerate(population):
+        chromosome.loss = idx
+    return population
+
+
+@pytest.fixture(autouse=True)
+def operations():
+    operations = mock.MagicMock()
+    operations.selection = mock.MagicMock(return_value=(BaseChromosome, BaseChromosome))
+    operations.crossover = mock.MagicMock(return_value=BaseChromosome)
+    operations.mutation = mock.MagicMock(return_value=BaseChromosome)
+    return operations
 
 
 if __name__ == "__main__":

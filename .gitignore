@@ -4,5 +4,5 @@ revolve/.coverage
 revolve/.ipynb_checkpoints
 revolve/coverage.sh
 revolve/conv_testing.ipynb
-operation_testing.ipynb
-parameter_testing.ipynb
+examples/operation_testing.ipynb
+examples/parameter_testing.ipynb

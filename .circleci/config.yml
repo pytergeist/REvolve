@@ -14,7 +14,8 @@ jobs:
           pkg-manager: pipenv
       - run:
           command: |
-            pipenv run pytest -v --cov-report term-missing --cov=algorithms revolve/tests/algorithms
+            cd revolve
+            pipenv run pytest -v --cov-report term-missing --cov=algorithms tests/algorithms
 
           name: Test algorithms
 
@@ -29,12 +30,47 @@ jobs:
           pkg-manager: pipenv
       - run:
           command: |
-            pipenv run pytest -v --cov-report term-missing --cov=architectures revolve/tests/architectures
+            cd revolve
+            pipenv run pytest -v --cov-report term-missing --cov=architectures tests/architectures
 
           name: Test architectures
+
+
+    build-and-test-grids:
+    docker:
+      - image: cimg/python:3.9
+    steps:
+      - checkout
+      - python/install-packages:
+          args: pytest pytest-cov tensorflow tensorflow_addons
+          pkg-manager: pipenv
+      - run:
+          command: |
+            cd revolve
+            pipenv run pytest -v --cov-report term-missing --cov=grids tests/grids
+
+          name: Test grids
+
+
+    build-and-test-operators:
+    docker:
+      - image: cimg/python:3.9
+    steps:
+      - checkout
+      - python/install-packages:
+          args: pytest pytest-cov tensorflow tensorflow_addons
+          pkg-manager: pipenv
+      - run:
+          command: |
+            cd revolve
+            pipenv run pytest -v --cov-report term-missing --cov=operators tests/operators
+
+          name: Test operators
 
 workflows:
   main:
     jobs:
       - build-and-test-algorithms
       - build-and-test-architectures
+      - build-and-test-grids
+      - build-and-test-operators

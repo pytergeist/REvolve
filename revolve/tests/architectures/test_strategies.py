@@ -1,12 +1,8 @@
 import pytest
 from unittest import mock
-from revolve.architectures import (
-    MLPStrategy,
-    MLPChromosome,
-    Conv2DChromosome,
-    Conv2DStrategy,
-)
-from revolve.architectures import FCGene, ParameterGene, Conv2DGene
+from revolve.architectures.strategies import MLPStrategy, Conv2DStrategy
+from revolve.architectures.chromosomes import MLPChromosome, Conv2DChromosome
+from revolve.architectures.genes import FCGene, ParameterGene, Conv2DGene
 
 
 @pytest.mark.parametrize(

@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
-from revolve.architectures import FCGene, Conv2DGene, ParameterGene
-from revolve.architectures.base import Gene
+from revolve.architectures.genes import FCGene, Conv2DGene, ParameterGene
+from revolve.architectures.base import BaseGene
 
 
 @pytest.mark.parametrize(
@@ -15,7 +15,7 @@ def test_gene_init(gene, gene_params, gene_type, request):
     gene_params = request.getfixturevalue(gene_params)
     new_gene = gene(**gene_params)
     assert isinstance(new_gene, gene)
-    assert isinstance(new_gene, Gene)
+    assert isinstance(new_gene, BaseGene)
     assert new_gene.gene_type == gene_type
     assert new_gene.parameters == gene_params
 
@@ -77,7 +77,7 @@ def test_parameter_gene_init(parameter_gene_params):
     for key, value in parameter_gene_params.items():
         param_gene = ParameterGene(parameter_name=key, parameter=value)
         assert isinstance(param_gene, ParameterGene)
-        assert isinstance(param_gene, Gene)
+        assert isinstance(param_gene, BaseGene)
         assert param_gene.gene_type == key
         assert hasattr(param_gene, key)
         assert getattr(param_gene, key) == value

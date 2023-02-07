@@ -1,11 +1,12 @@
-from typing import Union, Tuple
+from typing import Tuple
 import tensorflow as tf
 import numpy as np
 from typing import List
-from revolve.architectures.base import Strategy, Chromosome
+from revolve.architectures.base import BaseStrategy, BaseChromosome
+from .base import BaseEvolutionaryAlgorithm
 
 
-class EvolutionaryAlgorithmElitism:
+class EvolutionaryAlgorithmElitism(BaseEvolutionaryAlgorithm):
     """
     Class that implements a genetic algorithm with elitism.
 
@@ -21,7 +22,7 @@ class EvolutionaryAlgorithmElitism:
 
     def __init__(
         self,
-        strategy: Strategy,
+        strategy: BaseStrategy,
         pop_size: int,
         elitism_size: int,
         operations: object,
@@ -31,7 +32,7 @@ class EvolutionaryAlgorithmElitism:
         self.elitism_size = elitism_size
         self.data: List[list] = []
         self.elite_models = [None] * elitism_size
-        self.population: List[Strategy] = []
+        self.population: List[BaseStrategy] = []
         self.operations = operations
 
     @staticmethod
@@ -51,11 +52,6 @@ class EvolutionaryAlgorithmElitism:
         ]
 
         return population, elite_models
-
-    @staticmethod
-    def get_min_fitness(population):
-        min_idx = np.argsort([chromosome.loss for chromosome in population])[0]
-        return population[min_idx]
 
     def evolve_population(
         self,
@@ -95,9 +91,7 @@ class EvolutionaryAlgorithmElitism:
         while len(self.population) < self.pop_size:
             parent1, parent2 = self.operations.selection(prev_population)
 
-            offspring = self.operations.crossover(
-                parents=(parent1, parent2), strategy=self.strategy
-            )
+            offspring = self.operations.crossover(parents=(parent1, parent2))
 
             mutated_offspring = self.operations.mutation(
                 offspring=offspring, parameters=self.strategy.parameters
@@ -107,7 +101,7 @@ class EvolutionaryAlgorithmElitism:
 
         return self.get_min_fitness(prev_population)
 
-    def _population_asses(self, data):
+    def _population_asses(self, data: Tuple[tf.data.Dataset]):
         """
         Assess the population of chromosomes using the given strategy.
 
@@ -143,29 +137,14 @@ class EvolutionaryAlgorithmElitism:
                 model = self.get_model_fitness(chromosome, data)
                 models.append(model)
 
+        tf.keras.backend.clear_session()
+
         return models
-
-    def get_model_fitness(
-        self,
-        chromosome: Chromosome,
-        data: Tuple[tf.data.Dataset],
-    ):
-        model, loss, metric = chromosome.get_fitness(
-            self.strategy.parameters,
-            chromosome.genes,
-            data,
-            self.strategy.epochs,
-            self.strategy.callback,
-        )
-        chromosome.loss = loss
-        chromosome.metric = metric
-
-        return model
 
     def get_elite_model_fitness(
         self,
         idx: int,
-        chromosome: Chromosome,
+        chromosome: BaseChromosome,
         data: Tuple[tf.data.Dataset],
     ):
         batch_size = chromosome.get_parameter(

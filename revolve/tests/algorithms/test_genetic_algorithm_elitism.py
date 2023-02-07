@@ -4,21 +4,20 @@ from unittest import mock
 from revolve.algorithms.evolutionary_algorithm_elitism import (
     EvolutionaryAlgorithmElitism,
 )
-from revolve.architectures.mlp_chromosome import MLPChromosome
-from revolve.architectures.conv2d_chromosome import Conv2DChromosome
-from revolve.architectures.base import Chromosome
+from revolve.architectures.chromosomes import MLPChromosome, Conv2DChromosome
+from revolve.architectures.base import BaseChromosome
 
 
 @pytest.mark.parametrize(
-    "population, strategy, ea_operations, expected_chromosome",
+    "population, strategy, expected_chromosome",
     [
-        ("mlp_population", "mlp_strategy", "operations", MLPChromosome),
-        ("conv_population", "conv2d_strategy", "operations", Conv2DChromosome),
+        ("mlp_population", "mlp_strategy", MLPChromosome),
+        ("conv_population", "conv2d_strategy", Conv2DChromosome),
     ],
 )
-def test_elitism(population, strategy, ea_operations, expected_chromosome, request):
+def test_elitism(population, strategy, expected_chromosome, request):
     strategy = request.getfixturevalue(strategy)
-    operations = request.getfixturevalue(ea_operations)
+    operations = request.getfixturevalue("operations")
     population = request.getfixturevalue(population)
     ea = EvolutionaryAlgorithmElitism(
         strategy=strategy,
@@ -40,18 +39,16 @@ def test_elitism(population, strategy, ea_operations, expected_chromosome, reque
 
 
 @pytest.mark.parametrize(
-    "population, strategy, ea_operations, expected_chromosome",
+    "population, strategy, expected_chromosome",
     [
-        ("mlp_population", "mlp_strategy", "operations", MLPChromosome),
-        ("conv_population", "conv2d_strategy", "operations", Conv2DChromosome),
+        ("mlp_population", "mlp_strategy", MLPChromosome),
+        ("conv_population", "conv2d_strategy", Conv2DChromosome),
     ],
 )
-def test_get_min_fitness(
-    population, strategy, ea_operations, expected_chromosome, request
-):
+def test_get_min_fitness(population, strategy, expected_chromosome, request):
     population = request.getfixturevalue(population)
     strategy = request.getfixturevalue(strategy)
-    operations = request.getfixturevalue(ea_operations)
+    operations = request.getfixturevalue("operations")
 
     ea = EvolutionaryAlgorithmElitism(
         strategy=strategy,
@@ -65,22 +62,21 @@ def test_get_min_fitness(
 
 
 @pytest.mark.parametrize(
-    "population, strategy, data, ea_operations",
+    "population, strategy, data",
     [
-        ("mlp_population", "mlp_strategy", "mock_data", "operations"),
+        ("mlp_population", "mlp_strategy", "mock_data"),
         (
             "conv_population",
             "conv2d_strategy",
             "mock_data",
-            "operations",
         ),
     ],
 )
-def test_evolve_population(population, strategy, data, ea_operations, request):
+def test_evolve_population(population, strategy, data, request):
     population = request.getfixturevalue(population)
     strategy = request.getfixturevalue(strategy)
     data = request.getfixturevalue(data)
-    operations = request.getfixturevalue(ea_operations)
+    operations = request.getfixturevalue("operations")
     model_mock = mock.MagicMock()
 
     ea = EvolutionaryAlgorithmElitism(
@@ -92,23 +88,23 @@ def test_evolve_population(population, strategy, data, ea_operations, request):
     ea.get_model_fitness = mock.MagicMock(return_value=model_mock)
     ea.population = population
     best_chromosome = ea.evolve_population(data, 1)
-    assert isinstance(best_chromosome, Chromosome)
-    assert isinstance(ea.data[0][0], Chromosome)
+    assert isinstance(best_chromosome, BaseChromosome)
+    assert isinstance(ea.data[0][0], BaseChromosome)
     assert isinstance(ea.data, list)
 
 
 @pytest.mark.parametrize(
-    "strategy, population, data, operations",
+    "strategy, population, data",
     [
-        ("mlp_strategy", "mlp_population", "mock_data", "operations"),
-        ("conv2d_strategy", "conv_population", "mock_data", "operations"),
+        ("mlp_strategy", "mlp_population", "mock_data"),
+        ("conv2d_strategy", "conv_population", "mock_data"),
     ],
 )
-def test__population_asses(strategy, population, data, operations, request):
+def test__population_asses(strategy, population, data, request):
     strategy = request.getfixturevalue(strategy)
     population = request.getfixturevalue(population)
     data = request.getfixturevalue(data)
-    operations = request.getfixturevalue(operations)
+    operations = request.getfixturevalue("operations")
 
     model_mock = mock.MagicMock()
     model_mock.evaluate = mock.MagicMock(return_value=(0.1, 0.2))
@@ -191,7 +187,7 @@ def test_get_elite_model_fitness(strategy, data, request):
     "strategy, mock_data",
     [
         ("mlp_strategy", "mock_data"),
-        ("conv2d" "_strategy", "mock_data"),
+        ("conv2d_strategy", "mock_data"),
     ],
 )
 def test_fit(strategy, mock_data, request):
