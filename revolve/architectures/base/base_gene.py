@@ -17,7 +17,6 @@ class BaseGene(ABC):
         pass
 
     def mutate(self, learnable_parameters: dict):
-        """CHECK THIS MUTATE METHOD IS WORKING"""
 
         for param, value in self.parameters.items():
             if isinstance(learnable_parameters.get(param), list):
