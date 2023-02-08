@@ -1,8 +1,17 @@
+"""
+File containing functions for selection evolutionary operations
+"""
+
 import random
-from typing import Tuple
+from typing import Tuple, List, Union
+from revolve.architectures.chromosomes import MLPChromosome, Conv2DChromosome
+
+chromosome_type = Union[MLPChromosome, Conv2DChromosome]  # pylint: disable=invalid-name
 
 
-def tournament_selection(population, size: int) -> Tuple:
+def tournament_selection(
+    population: List[chromosome_type], size: int
+) -> Tuple[chromosome_type, chromosome_type]:
     """
     Selects two parents for breeding using tournament selection.
 
@@ -21,7 +30,9 @@ def tournament_selection(population, size: int) -> Tuple:
     return parent1[0], parent2[0]
 
 
-def roulette_wheel_selection(population) -> Tuple:
+def roulette_wheel_selection(
+    population: List[chromosome_type],
+) -> Tuple[chromosome_type, chromosome_type]:
     """
     Selects two parents for breeding using roulette wheel selection.
 

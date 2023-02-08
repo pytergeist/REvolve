@@ -1,10 +1,15 @@
+"""
+File containing class for ConvParameterGrid, child class of ParameterGrid:
+    defines values for learnable and static parameters of convultion network
+"""
+
 from dataclasses import dataclass
 from typing import Union, List
 from .base import ParameterGrid
 
 
 @dataclass
-class ConvParameterGrid(ParameterGrid):
+class ConvParameterGrid(ParameterGrid):  # pylint: disable=too-many-instance-attributes
     """
     Subclass of Parameter grid that holds learnable/static hyper-parameters
     for convolution neural networks

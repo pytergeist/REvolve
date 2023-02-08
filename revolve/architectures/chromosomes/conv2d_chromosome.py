@@ -1,4 +1,10 @@
-from typing import Optional
+"""
+File containing Conv2DChromosome class:
+    Conv2DChromosome represents the architecture of a network, including fully connected and
+    2d convolution layers, and parameter genes, and the loss and metric values of the chromosome.
+"""
+
+from typing import Optional, Dict, Union
 import tensorflow as tf
 from revolve.architectures.base import BaseChromosome
 
@@ -13,7 +19,8 @@ class Conv2DChromosome(BaseChromosome):
     metric: chosen metric for chromosome
 
     methods:
-        decode(learnable_parameters: dict) - method to decode 2D convolution architecture and return keras model
+        decode(learnable_parameters: dict) - method to decode 2D convolution architecture and
+        return keras model
 
     """
 
@@ -26,7 +33,7 @@ class Conv2DChromosome(BaseChromosome):
         """
         Initialize a Conv2DChromosome object.
 
-        Arguments:
+        Attributes:
         - genes: list of gene objects
         - loss: a float representing the loss (default None)
         - metric: a float representing the metric (default None)
@@ -38,7 +45,9 @@ class Conv2DChromosome(BaseChromosome):
         self.loss = loss
         self.metric = metric
 
-    def decode(self, learnable_parameters: dict) -> tf.keras.Sequential:
+    def decode(
+        self, learnable_parameters: Dict[str, Union[str, float, int]]
+    ) -> tf.keras.Model:
         """
         Decode the genes into a Keras model.
 
@@ -51,58 +60,58 @@ class Conv2DChromosome(BaseChromosome):
 
         _inputs = tf.keras.Input(shape=learnable_parameters.get("input_shape"))
 
-        x = tf.keras.layers.Conv2D(
+        x_conv = tf.keras.layers.Conv2D(
             filters=self.genes[0].filters,
             kernel_size=self.genes[0].kernel_size,
             strides=self.genes[0].stride,
             activation=self.genes[0].activation,
             padding="same",
         )(_inputs)
-        x = tf.keras.layers.BatchNormalization()(x)
+        x_conv = tf.keras.layers.BatchNormalization()(x_conv)
         if self.genes[1].gene_type == "conv2d" and self.genes[1].filters != 0:
-            x = tf.keras.layers.MaxPool2D(strides=self.genes[0].stride, padding="same")(
-                x
-            )
+            x_conv = tf.keras.layers.MaxPool2D(
+                strides=self.genes[0].stride, padding="same"
+            )(x_conv)
         else:
-            x = tf.keras.layers.Flatten()(x)
+            x_conv = tf.keras.layers.Flatten()(x_conv)
 
         for idx, gene in enumerate(self.genes[1:]):
             if gene.gene_type == "conv2d" and gene.filters != 0:
                 if self.genes[idx + 2].gene_type != "fc":
-                    x = tf.keras.layers.Conv2D(
+                    x_conv = tf.keras.layers.Conv2D(
                         filters=gene.filters,
                         kernel_size=gene.kernel_size,
                         strides=gene.stride,
                         activation=gene.activation,
                         padding="same",
-                    )(x)
-                    x = tf.keras.layers.BatchNormalization()(x)
-                    x = tf.keras.layers.MaxPool2D(strides=gene.stride, padding="same")(
-                        x
-                    )
+                    )(x_conv)
+                    x_conv = tf.keras.layers.BatchNormalization()(x_conv)
+                    x_conv = tf.keras.layers.MaxPool2D(
+                        strides=gene.stride, padding="same"
+                    )(x_conv)
                 else:
-                    x = tf.keras.layers.Conv2D(
+                    x_conv = tf.keras.layers.Conv2D(
                         filters=gene.filters,
                         kernel_size=gene.kernel_size,
                         strides=gene.stride,
                         activation=gene.activation,
                         padding="same",
-                    )(x)
-                    x = tf.keras.layers.BatchNormalization()(x)
-                    x = tf.keras.layers.Flatten()(x)
+                    )(x_conv)
+                    x_conv = tf.keras.layers.BatchNormalization()(x_conv)
+                    x_conv = tf.keras.layers.Flatten()(x_conv)
 
             if gene.gene_type == "fc" and gene.hidden_neurons != 0:
-                x = tf.keras.layers.Dense(
+                x_conv = tf.keras.layers.Dense(
                     gene.hidden_neurons,
                     activation=gene.activation,
                     kernel_regularizer=tf.keras.regularizers.L1L2(
                         l1=gene.l1, l2=gene.l2
                     ),
-                )(x)
-                x = tf.keras.layers.Dropout(gene.dropout)(x)
+                )(x_conv)
+                x_conv = tf.keras.layers.Dropout(gene.dropout)(x_conv)
 
         output = tf.keras.layers.Dense(
             learnable_parameters.get("regression_target"),
             activation=learnable_parameters.get("regression_activation"),
-        )(x)
+        )(x_conv)
         return tf.keras.Model(inputs=_inputs, outputs=output)

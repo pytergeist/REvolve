@@ -1,15 +1,21 @@
+"""
+File containing Conv2DGene class which inherits from the BaseGene class:
+    Conv2D represent a conv2d layer in the network architecture
+"""
+
 import tensorflow as tf
 from revolve.architectures.base import BaseGene
 
 
 class Conv2DGene(BaseGene):
     """
-    Conv2DGene is a sub-class of BaseGene which represents a convolutional layer in a CNN model.
+    Conv2DGene is a subclass of BaseGene which represents a convolutional layer in a CNN model.
 
-    :param filters: (int) The number of filters to use.
-    :param kernel_size: (int) The size of the kernel to use.
-    :param stride: (int) The size of the stride to use.
-    :param activation: (str) The activation function to use.
+    Args
+        filters: (int) The number of filters to use.
+        kernel_size: (int) The size of the kernel to use.
+        stride: (int) The size of the stride to use.
+        activation: (str) The activation function to use.
     """
 
     def __init__(
@@ -39,14 +45,14 @@ class Conv2DGene(BaseGene):
         """
         assert self.gene_type == "conv2d"
         assert isinstance(
-            self.filters, int
-        ), f"invalid num filter: {self.filters}, enter as integer"
+            self.parameters["filters"], int
+        ), f"invalid num filter: {self.parameters['filters']}, enter as integer"
         assert isinstance(
-            self.kernel_size, int
-        ), f"invalid kernel size: {self.kernel_size}, enter as integer"
+            self.parameters["kernel_size"], int
+        ), f"invalid kernel size: {self.parameters['kernel_size']}, enter as integer"
         assert isinstance(
-            self.stride, int
-        ), f"invalid stride: {self.stride}, enter as integer"
+            self.parameters["stride"], int
+        ), f"invalid stride: {self.parameters['stride']}, enter as integer"
         assert hasattr(
-            tf.keras.activations, self.activation
-        ), f"unknown activation function: {self.activation}"
+            tf.keras.activations, self.parameters["activation"]
+        ), f"unknown activation function: {self.parameters['activation']}"

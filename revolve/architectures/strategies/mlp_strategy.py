@@ -1,9 +1,15 @@
+"""
+File containing MLPChromosome class:
+    MLPChromosome represents the architecture of an MLP network, including fully connected layer
+    and parameter genes
+"""
+
 import itertools
-from dataclasses import dataclass
 from typing import Union, List
 
 import tensorflow as tf
 
+from revolve.grids import MLPParameterGrid
 from revolve.architectures.genes import FCGene, ParameterGene
 from revolve.architectures.chromosomes import MLPChromosome
 from revolve.architectures.base import BaseStrategy
@@ -11,8 +17,8 @@ from revolve.architectures.base import BaseStrategy
 
 class MLPStrategy(BaseStrategy):
     """
-    Strategy class for handling MLP chromosomes. This strategy is responsible for generating a population
-    of chromosomes, and checking if a chromosome is a valid architecture.
+    Strategy class for handling MLP chromosomes. This strategy is responsible for
+    generating a population of MLPChromosomes, and checking if a chromosome is a valid architecture.
 
     Args:
         parameters (dataclass): Dataclass containing learnable parameters.
@@ -28,7 +34,7 @@ class MLPStrategy(BaseStrategy):
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
-        parameters: dataclass,
+        parameters: type[MLPParameterGrid],
         max_fc: int = 3,
         squeeze_fc: bool = False,
         epochs: int = 100,
@@ -55,13 +61,14 @@ class MLPStrategy(BaseStrategy):
 
         self.parameters = parameters  # self.get_learnable_parameters()
 
-    @staticmethod  # no longer needed
-    def create_new_chromosome(genes: List[object]):
+    @staticmethod
+    def create_new_chromosome(genes: List[Union[FCGene, ParameterGene]]):
         """
         Create a new MLPChromosome from a list of genes.
 
         Args:
-            genes (List[Union[FCGene, ParameterGene]]): List of genes to be used for creating the chromosome.
+            genes (List[Union[FCGene, ParameterGene]]): List of genes to be used for
+            creating the chromosome.
 
         Returns:
             MLPChromosome: A new MLPChromosome.
@@ -85,12 +92,12 @@ class MLPStrategy(BaseStrategy):
         key_store: List[str] = []
 
         while len(population) < population_size:
-            fc_block = self.fc_block(gene=FCGene, max_fc=self.max_fc)
+            fc_block = self.fc_block(self.parameters, FCGene, max_fc=self.max_fc)
 
             if self.squeeze_fc:
                 fc_block = self.squeeze_fc_neurons(fc_block)
 
-            parameter_block = self.parameter_block(gene=ParameterGene)
+            parameter_block = self.parameter_block(self.parameters, gene=ParameterGene)
 
             genes = list(itertools.chain(fc_block, parameter_block))
 
@@ -98,10 +105,11 @@ class MLPStrategy(BaseStrategy):
 
             key = chromosome.get_unique_key(chromosome.genes)
 
-            if key not in key_store and self.check_valid_architecture(
-                chromosome, "hidden_neurons"
-            ):
-                population.append(chromosome)
-                key_store.append(key)
+            if key not in key_store:
+                if self.check_valid_architecture(
+                    chromosome, "hidden_neurons"
+                ) and self.check_first_layer(chromosome, "hidden_neurons"):
+                    population.append(chromosome)
+                    key_store.append(key)
 
         return population

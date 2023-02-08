@@ -91,18 +91,19 @@ def test_create_new_chromosome(
 
 
 @pytest.mark.parametrize(
-    "strategy, param",
+    "strategy, parameters, param",
     [
-        ("mlp_strategy", "batch_size"),
-        ("mlp_strategy", "regression_activation"),
-        ("conv2d_strategy", "batch_size"),
-        ("conv2d_strategy", "regression_activation"),
+        ("mlp_strategy", "mlp_params", "batch_size"),
+        ("mlp_strategy", "mlp_params", "regression_activation"),
+        ("conv2d_strategy", "conv_network_params", "batch_size"),
+        ("conv2d_strategy", "conv_network_params", "regression_activation"),
     ],
 )
-def test_parameter_choice(strategy, param, request):
+def test_parameter_choice(strategy, parameters, param, request):
     strategy = request.getfixturevalue(strategy)
-    chosen_param = strategy.parameter_choice(param)
-    assert chosen_param in strategy.parameters[param]
+    parameters = request.getfixturevalue(parameters)
+    chosen_param = strategy.parameter_choice(parameters, param)
+    assert chosen_param in strategy.parameters.get(param)
 
 
 @pytest.mark.parametrize(

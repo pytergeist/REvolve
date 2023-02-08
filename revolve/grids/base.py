@@ -1,3 +1,8 @@
+"""
+File containing base class for the parameter grids:
+    one method and two properties: get method, and learnable_properties and static properties
+"""
+
 from dataclasses import dataclass
 
 
@@ -8,7 +13,7 @@ class ParameterGrid:
 
     """
 
-    def get(self, parameter_name):
+    def get(self, parameter_name: str):
         """
         Return the value of the specified learnable parameter.
 
@@ -20,27 +25,25 @@ class ParameterGrid:
     @property
     def learnable_parameters(self):
         """
-        Return a list of learnable parameters, where each element is a tuple containing the name of the parameter
-        and its value(s).
+        Return a list of learnable parameters, where each element is a tuple
+        containing the name of the parameter and its value(s).
 
-        :return: list of learnable parameters
+        return: list of learnable parameters
         """
-        return [
-            (key, self.__dict__[key])
-            for key in self.__dict__
-            if isinstance(self.__dict__[key], list)
-        ]
+        return {
+            key: item for key, item in self.__dict__.items() if isinstance(item, list)
+        }
 
     @property
     def static_parameters(self):
         """
-        Return a list of static parameters, where each element is a tuple containing the name of the parameter
-        and its value.
+        Return a list of static parameters, where each element is a tuple
+        containing the name of the parameter and its value.
 
         :return: list of static parameters
         """
-        return [
-            (key, self.__dict__[key])
-            for key in self.__dict__
-            if not isinstance(self.__dict__[key], list)
-        ]
+        return {
+            key: item
+            for key, item in self.__dict__.items()
+            if not isinstance(item, list)
+        }

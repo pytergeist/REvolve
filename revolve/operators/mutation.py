@@ -1,9 +1,14 @@
+"""
+File containing functions for mutation evolutionary operations
+"""
+
 import random
-from revolve.architectures.base import BaseChromosome
+from typing import Union
+from revolve.architectures.chromosomes import MLPChromosome, Conv2DChromosome
 
 
 def random_mutation(
-    offspring: BaseChromosome,
+    offspring: Union[MLPChromosome, Conv2DChromosome],
     probability: float,
     parameters: dict,
 ):
@@ -14,7 +19,7 @@ def random_mutation(
     offspring (list): The offspring to be mutated.
     """
 
-    for idx in range(len(offspring.genes)):
+    for idx, _ in enumerate(offspring.genes):
         if random.uniform(0, 1) <= probability:
             offspring.genes[idx].mutate(parameters)
 

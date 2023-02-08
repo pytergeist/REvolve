@@ -1,3 +1,9 @@
+"""
+    File containing class for Operations:
+        implements register method that allows users to
+        register evolutionary operations for evolutionary NAS
+"""
+
 from functools import partial
 
 
@@ -23,8 +29,8 @@ class Operations:
         :return: None
 
         func.name assigns name to the attribute, follow naming convention for evolutionary
-        operations (i.e. *_selection, *_crossover, *_mutation) as this is needed by evolutionary algorithm
-        class.
+        operations (i.e. *_selection, *_crossover, *_mutation) as this is needed by evolutionary
+        algorithm class.
         """
         func = partial(function, *args, **kwargs)
         func.name = function.__name__.split("_")[-1]
@@ -32,4 +38,7 @@ class Operations:
         setattr(self, func.name, func)
 
     def get_operations(self):
+        """
+        Function to get rgistered operations
+        """
         return list(self.__dict__.keys())

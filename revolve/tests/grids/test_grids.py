@@ -4,11 +4,11 @@ from revolve.grids import MLPParameterGrid, ConvParameterGrid
 
 @pytest.mark.parametrize(
     "grid, parameters",
-    [(MLPParameterGrid, "mlp_params"), (ConvParameterGrid, "conv_network_params")],
+    [("mlp_grid", "mlp_params"), ("conv_grid", "conv_network_params")],
 )
 def test_grid_init(grid, parameters, request):
     parameters = request.getfixturevalue(parameters)
-    grid = grid(**parameters)
+    grid = request.getfixturevalue(grid)
     assert all([key in parameters.keys() for key in grid.__dict__.keys()])
 
 
@@ -29,40 +29,28 @@ def test_grid_get_parameter(grid, parameters, choice, expected, request):
 
 
 @pytest.mark.parametrize(
-    "grid, parameters",
+    "grid",
     [
-        (MLPParameterGrid, "mlp_params"),
-        (ConvParameterGrid, "conv_network_params"),
+        "mlp_grid",
+        "conv_grid",
     ],
 )
-def test_grid_learnable_parameters(grid, parameters, request):
-    parameters = request.getfixturevalue(parameters)
-    grid = grid(**parameters)
-    learnable_parameters = {key: value for key, value in grid.learnable_parameters}
-    assert all(
-        [
-            key in parameters.keys()
-            for key in learnable_parameters.keys()
-            if isinstance(parameters[key], list)
-        ]
-    )
+def test_grid_learnable_parameters(grid, request):
+    grid = request.getfixturevalue(grid)
+    learnable_parameters = grid.learnable_parameters
+    assert all(list(isinstance(value, list) for value in learnable_parameters.values()))
 
 
 @pytest.mark.parametrize(
-    "grid, parameters",
+    "grid",
     [
-        (MLPParameterGrid, "mlp_params"),
-        (ConvParameterGrid, "conv_network_params"),
+        "mlp_grid",
+        "conv_grid",
     ],
 )
-def test_grid_learnable_parameters(grid, parameters, request):
-    parameters = request.getfixturevalue(parameters)
-    grid = grid(**parameters)
-    learnable_parameters = {key: value for key, value in grid.static_parameters}
+def test_grid_learnable_parameters(grid, request):
+    grid = request.getfixturevalue(grid)
+    static_parameters = grid.static_parameters
     assert all(
-        [
-            key in parameters.keys()
-            for key in learnable_parameters.keys()
-            if not isinstance(parameters[key], list)
-        ]
+        list(not isinstance(value, list) for value in static_parameters.values())
     )

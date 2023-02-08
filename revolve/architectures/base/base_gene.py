@@ -1,13 +1,21 @@
+"""
+File containing BaseGene class with abstract and defined method:
+    each gene inherits BaseGene and every child gene either
+    represents a layer or parameter of the network
+"""
+
 from __future__ import annotations
 import random
 from abc import ABC, abstractmethod
+from typing import Dict, Any, Optional
 
 
 class BaseGene(ABC):
     """
     Base class for Gene.
 
-    A Gene is a representation of a portion of the machine learning model architecture or training configuration.
+    A Gene is a representation of a portion of the machine learning model architecture
+    or training configuration.
 
     """
 
@@ -30,18 +38,29 @@ class BaseGene(ABC):
 
         This method should validate that the parameters of the gene are within acceptable ranges.
         """
-        pass
 
-    def mutate(self, learnable_parameters: dict):
+    def mutate(self, learnable_parameters: Dict[str, Optional[Any]]):
         """
         Mutate the gene.
 
         Parameters:
         learnable_parameters (dict): A dictionary of learnable parameters.
         """
-        for param, value in self.parameters.items():
-            if isinstance(learnable_parameters.get(param), list):
-                setattr(self, param, random.choice(learnable_parameters.get(param)))
+        for param in self.parameters:
+            value = learnable_parameters.get(param)
+            if value is not None and isinstance(value, list):
+                setattr(self, param, random.choice(value))
+
+    # def mutate(self, learnable_parameters: Dict[str, Any]):
+    #     """
+    #     Mutate the gene.
+    #
+    #     Parameters:
+    #     learnable_parameters (dict): A dictionary of learnable parameters.
+    #     """
+    #     for param in self.parameters:
+    #         if isinstance(learnable_parameters.get(param), list):
+    #             setattr(self, param, random.choice(learnable_parameters.get(param)))
 
     def get_attributes(self):
         """
@@ -61,3 +80,7 @@ class BaseGene(ABC):
         list: A list of names of the parameters of the gene.
         """
         return list(self.parameters.keys())
+
+    @property
+    def get_attribute_dict(self):
+        return self.parameters

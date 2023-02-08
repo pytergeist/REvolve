@@ -1,4 +1,10 @@
-from typing import Any
+"""
+File containing ParameterGene class which inherits from the BaseGene class:
+    ParameterGene represents a training parameter of the architecture
+    (batch_size, optimizer... etc)
+"""
+
+from typing import Union
 from revolve.architectures.base import BaseGene
 
 
@@ -11,7 +17,7 @@ class ParameterGene(BaseGene):
     :param parameter: (Any): the value of the parameter
     """
 
-    def __init__(self, parameter_name: str, parameter: Any):
+    def __init__(self, parameter_name: str, parameter: Union[str, float, int]):
         super().__init__(
             gene_type=parameter_name,
             parameter=parameter,
@@ -25,4 +31,3 @@ class ParameterGene(BaseGene):
         """
         Internal method to validate the parameters passed to the constructor.
         """
-        pass

@@ -82,7 +82,9 @@ def test_build_and_compile_model(chromosome, params, gene_params, request):
     chromosome = request.getfixturevalue(chromosome)
     params = request.getfixturevalue(params)
     gene_params = request.getfixturevalue(gene_params)
-    model = chromosome.build_and_compile_model(params, chromosome.genes)
+    loss = "mean_squared_error"
+    metric = "mean_absolute_error"
+    model = chromosome.build_and_compile_model(params, loss, metric, chromosome.genes)
     assert isinstance(model, tf.keras.Model)
     assert (
         str(model.optimizer.name)
@@ -166,23 +168,29 @@ def test_get_fitness(chromosome, data, params, request):
     model_mock = mock.MagicMock()
     batch_size = params["batch_size"]
     epochs = 10
-    loss = 0.5
-    metric = 0.6
+    loss = mock.MagicMock()
+    metric = mock.MagicMock()
+    loss_value = 0.5
+    metric_value = 0.6
 
     chromosome.build_and_compile_model = mock.MagicMock(return_value=model_mock)
     chromosome.get_parameter = mock.MagicMock(return_value=batch_size)
     chromosome.fit_model = mock.MagicMock(return_value=model_mock)
-    chromosome.evaluate_model = mock.MagicMock(return_value=(loss, metric))
+    chromosome.evaluate_model = mock.MagicMock(return_value=(loss_value, metric_value))
 
     result = chromosome.get_fitness(
         params,
         chromosome.genes,
         mock_data,
+        loss,
+        metric,
         epochs,
         callback,
     )
 
-    chromosome.build_and_compile_model.assert_called_with(params, chromosome.genes)
+    chromosome.build_and_compile_model.assert_called_with(
+        params, loss, metric, chromosome.genes
+    )
     chromosome.get_parameter.assert_called_with(
         "batch_size", params.get("batch_size"), chromosome.genes
     )
@@ -192,4 +200,4 @@ def test_get_fitness(chromosome, data, params, request):
 
     chromosome.evaluate_model.assert_called_with(model_mock, test_data, batch_size)
 
-    assert result == (model_mock, loss, metric)
+    assert result == (model_mock, loss_value, metric_value)

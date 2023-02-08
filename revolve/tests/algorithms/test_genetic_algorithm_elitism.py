@@ -89,7 +89,8 @@ def test_evolve_population(population, strategy, data, request):
     ea.population = population
     best_chromosome = ea.evolve_population(data, 1)
     assert isinstance(best_chromosome, BaseChromosome)
-    assert isinstance(ea.data[0][0], BaseChromosome)
+    assert isinstance(ea.data[0][0], dict)
+    assert isinstance(ea.data[0][1], dict)
     assert isinstance(ea.data, list)
 
 
@@ -121,7 +122,7 @@ def test__population_asses(strategy, population, data, request):
     ea.population = population
     models = ea._population_asses(data)
     assert isinstance(models, list)
-    ea.get_model_fitness.assert_called_with(ea.population[0], data)
+    ea.get_model_fitness.assert_called_with(ea.population[0], data, strategy)
 
 
 @pytest.mark.parametrize(
@@ -147,7 +148,7 @@ def test_get_model_fitness(strategy, data, request):
         operations=operations,
     )
 
-    model = ea.get_model_fitness(chromosome, data)
+    model = ea.get_model_fitness(chromosome, data, strategy)
     assert model == model_mock
     assert chromosome.loss == 0.1
     assert chromosome.metric == 0.2

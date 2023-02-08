@@ -1,21 +1,30 @@
+"""
+File containing Conv2DChromosome class:
+    Conv2DChromosome represents the architecture of an 2d convolution network, including fully
+    connected layer, 2d convolution layer and parameter genes
+"""
+
 import itertools
-import tensorflow as tf
-from dataclasses import dataclass
 from typing import (
     List,
     Union,
+    Callable,
+    Dict,
 )
-from revolve.architectures.genes import Conv2DGene
-from revolve.architectures.genes import ParameterGene
-from revolve.architectures.genes import FCGene
+
+import tensorflow as tf
+
+from revolve.grids import ConvParameterGrid
+from revolve.architectures.genes import Conv2DGene, FCGene, ParameterGene
 from revolve.architectures.chromosomes import Conv2DChromosome
 from revolve.architectures.base import BaseStrategy
 
 
 class Conv2DStrategy(BaseStrategy):
     """
-    Strategy class for handling Conv2D chromosomes. This strategy is responsible for generating a population
-    of chromosomes, and checking if a chromosome is a valid architecture.
+    Strategy class for handling Conv2D chromosomes. This strategy is responsible for
+    generating a population of chromosomes, and checking if a chromosome is a
+    valid architecture.
 
     Args:
         parameters (dataclass): Dataclass containing learnable parameters.
@@ -30,9 +39,11 @@ class Conv2DStrategy(BaseStrategy):
 
     """
 
+    # pylint: disable=too-many-instance-attributes
+
     def __init__(  # pylint: disable=too-many-arguments
         self,
-        parameters: dataclass,
+        parameters: type[ConvParameterGrid],
         max_fc: int = 3,
         squeeze_fc: bool = False,
         max_conv: int = 3,
@@ -69,12 +80,37 @@ class Conv2DStrategy(BaseStrategy):
         Create a new Conv2DChromosome from a list of genes.
 
         Args:
-            genes (List[Union[Conv2DGene, FCGene, ParameterGene]]): List of genes to be used for creating the chromosome.
+            genes (List[Union[Conv2DGene, FCGene, ParameterGene]]): List of genes to be
+            used for creating the chromosome.
 
         Returns:
             Conv2DChromosome: A new Conv2DChromosome.
         """
         return Conv2DChromosome(genes=genes)
+
+    def conv_block(
+        self, parameters: type[ConvParameterGrid], gene: Callable, max_conv: int
+    ):
+        """
+        Create a convolutional block of layers.
+
+        Args:
+            parameters (dict): dictionary of learnable parameters
+            gene (Callable): A callable function for creating a gene.
+            max_conv (int): The number of convolutional layers to create.
+
+        Returns:
+            list: A list of convolutional layers.
+        """
+        return [
+            gene(
+                filters=self.parameter_choice(parameters, "filters"),
+                kernel_size=self.parameter_choice(parameters, "kernel_size"),
+                stride=self.parameter_choice(parameters, "stride"),
+                activation=self.parameter_choice(parameters, "activation"),
+            )
+            for _ in range(max_conv)
+        ]
 
     def generate_population(self, population_size: int) -> List:
         """
@@ -93,17 +129,19 @@ class Conv2DStrategy(BaseStrategy):
         key_store: List[str] = []
 
         while len(population) < population_size:
-            fc_block = self.fc_block(gene=FCGene, max_fc=self.max_fc)
+            fc_block = self.fc_block(self.parameters, gene=FCGene, max_fc=self.max_fc)
 
             if self.squeeze_fc:
                 fc_block = self.squeeze_fc_neurons(fc_block)
 
-            conv_block = self.conv_block(gene=Conv2DGene, max_conv=self.max_conv)
+            conv_block = self.conv_block(
+                self.parameters, gene=Conv2DGene, max_conv=self.max_conv
+            )
 
             if self.expand_conv:
                 conv_block = self.expand_conv_filters(conv_block)
 
-            parameter_block = self.parameter_block(gene=ParameterGene)
+            parameter_block = self.parameter_block(self.parameters, gene=ParameterGene)
 
             genes = list(itertools.chain(conv_block, fc_block, parameter_block))
 
@@ -111,10 +149,11 @@ class Conv2DStrategy(BaseStrategy):
 
             key = chromosome.get_unique_key(chromosome.genes)
 
-            if key not in key_store and self.check_valid_architecture(
-                chromosome, "filters"
-            ):
-                population.append(chromosome)
-                key_store.append(key)
+            if key not in key_store:
+                if self.check_valid_architecture(
+                        chromosome, "filters"
+                ) and self.check_first_layer(chromosome, "filters"):
+                    population.append(chromosome)
+                    key_store.append(key)
 
         return population

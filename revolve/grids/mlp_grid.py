@@ -1,10 +1,15 @@
+"""
+File containing class for MLPParameterGrid, child class of ParameterGrid:
+    defines values for learnable and static parameters of MLP
+"""
+
 from dataclasses import dataclass
 from typing import Union, List
 from .base import ParameterGrid
 
 
 @dataclass
-class MLPParameterGrid(ParameterGrid):
+class MLPParameterGrid(ParameterGrid):  # pylint: disable=too-many-instance-attributes
     """
     Subclass of Parameter grid that holds learnable/static hyper-parameters
     for multi-layer perceptrons

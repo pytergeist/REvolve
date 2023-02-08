@@ -1,9 +1,16 @@
+"""
+File containing base class for evolutionary algorithms, implementing abstract
+and defined methods
+"""
+
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import Tuple
-from revolve.architectures.base import BaseChromosome
+from typing import Tuple, Union
 import tensorflow as tf
 import numpy as np
+
+from revolve.architectures.chromosomes import MLPChromosome, Conv2DChromosome
+from revolve.architectures.strategies import MLPStrategy, Conv2DStrategy
 
 
 class BaseEvolutionaryAlgorithm(ABC):
@@ -63,7 +70,6 @@ class BaseEvolutionaryAlgorithm(ABC):
         population : list[Chromosome]
             The evolved population.
         """
-        pass
 
     @abstractmethod
     def _population_asses(self, data: Tuple[tf.data.Dataset]):
@@ -75,12 +81,12 @@ class BaseEvolutionaryAlgorithm(ABC):
         data : Tuple[tf.data.Dataset]
             The data to fit the algorithm to.
         """
-        pass
 
     def get_model_fitness(
         self,
-        chromosome: BaseChromosome,
+        chromosome: Union[MLPChromosome, Conv2DChromosome],
         data: Tuple[tf.data.Dataset],
+        strategy: Union[MLPStrategy, Conv2DStrategy],
     ) -> tf.keras.Model:
         """
         Get the fitness of a chromosome.
@@ -91,6 +97,8 @@ class BaseEvolutionaryAlgorithm(ABC):
             The chromosome to get the fitness for.
         data : Tuple[tf.data.Dataset]
             The data to fit the chromosome with.
+        strategy: Union[MLPStrategy, Conv2DStrategy]
+            architecture strategy passed up from child class
 
         Returns
         -------
@@ -98,11 +106,13 @@ class BaseEvolutionaryAlgorithm(ABC):
             The fitted model.
         """
         model, loss, metric = chromosome.get_fitness(
-            self.strategy.parameters,
+            strategy.parameters,
             chromosome.genes,
             data,
-            self.strategy.epochs,
-            self.strategy.callback,
+            strategy.loss,
+            strategy.metric,
+            strategy.epochs,
+            strategy.callback,
         )
         chromosome.loss = loss
         chromosome.metric = metric
@@ -125,4 +135,3 @@ class BaseEvolutionaryAlgorithm(ABC):
         generations : int
             The number of generations to run the EA for
         """
-        pass

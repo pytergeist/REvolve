@@ -5,6 +5,7 @@ from revolve.architectures.chromosomes import MLPChromosome, Conv2DChromosome
 from revolve.architectures.strategies import MLPStrategy, Conv2DStrategy
 from revolve.architectures.genes import FCGene, Conv2DGene, ParameterGene
 from revolve.architectures.base import BaseChromosome
+from revolve.grids import MLPParameterGrid, ConvParameterGrid
 
 
 @pytest.fixture
@@ -67,6 +68,11 @@ def mlp_params(fc_learnable_params, parameter_learnable_params):
     return {**static_params, **fc_learnable_params, **parameter_learnable_params}
 
 
+@pytest.fixture()
+def mlp_grid(mlp_params):
+    return MLPParameterGrid(**mlp_params)
+
+
 @pytest.fixture
 def conv_learnable_params():
     return {
@@ -81,6 +87,11 @@ def conv_learnable_params():
 def conv_network_params(mlp_params, conv_learnable_params):
     network_params = {**mlp_params, **conv_learnable_params, "input_shape": (10, 10, 1)}
     return network_params
+
+
+@pytest.fixture
+def conv_grid(conv_network_params):
+    return ConvParameterGrid(**conv_network_params)
 
 
 @pytest.fixture
@@ -166,13 +177,15 @@ def mock_data():
 
 
 @pytest.fixture
-def mlp_strategy(mlp_params, mlp_strategy_params):
-    return MLPStrategy(mlp_params, **mlp_strategy_params)
+def mlp_strategy(mlp_grid, mlp_strategy_params):
+    strategy = MLPStrategy(parameters=mlp_grid, **mlp_strategy_params)
+    return strategy
 
 
 @pytest.fixture
-def conv2d_strategy(conv_network_params, conv_strategy_params):
-    return Conv2DStrategy(conv_network_params, **conv_strategy_params)
+def conv2d_strategy(conv_grid, conv_strategy_params):
+    strategy = Conv2DStrategy(parameters=conv_grid, **conv_strategy_params)
+    return strategy
 
 
 @pytest.fixture

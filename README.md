@@ -70,7 +70,7 @@ loss = tf.keras.losses.MeanSquaredError()
 ```
 
 The squeeze_fc parameter ensures that h_0>h_1>...>h_n, where h_n refers to the number of logits on hidden 
-layer n. The expand_conv parameter (seen in examples/conv2d_regression.ipynb) ensures that c_0<c_1<c_2...c_n, where c_n
+layer n. The expand_conv parameter (seen in examples/conv2d_regression.ipynb -- coming very soon!) ensures that c_0<c_1<c_2...c_n, where c_n
 refers to the filter size of convolution layers n. These two parameter can be True/False to implement or not implament 
 the constraint. These constraints only apply to the initial population of architectures.
 
@@ -119,15 +119,15 @@ operations.register(mutation, probability=0.2)
 
 # example with tournament selection
 operations = Operations()
-operations.register(tournament_selection)
+operations.register(tournament_selection, size=5)
 operations.register(uniform_crossover, probability=0.9)
 operations.register(mutation, probability=0.2)
 ```
 
 ## Algorithms 
 
-The two algorithms currently implemented are simple EA and EA with elitism. These can both be imported from the 
-algorithms module and take the strategy, population_size, and operations as arguments (and elitism_size if relevant).
+The algorithm currently implemented is EA with elitism. This can both be imported from the 
+algorithms module and take the strategy, population_size, and elitism_size, and operations as arguments..
 
 
 ```python 
@@ -154,11 +154,37 @@ test_data = tf.data.Dataset.from_tensor_slices((x_test, y_test))
 
 data = (train_data, valid_data, test_data)
 
-ea.fit(
+best_chromosome = ea.fit(
     data=data,
     generations=5,
 )
 ```
+
+Once fit the EA will return the best chromosome, which can be decoded into a model
+with the .decode function which take the grid parameters as an argument. The results 
+for every generation can be returned as a dataframe with the ea.results_df() function. 
+This returns a dataframe with the learnt_parameters, static_parameters, loss and metric values and
+the generation it was found in for every chromosome. The row of parameters for the best chromosome can 
+be returned by parsing the dataframe for the lowest loss value.
+
+```python 
+model = best_chromosome.decode(params)
+df = ga.results_df()
+best_chromosome_row = df[df.loss == df.loss.min()]
+```
+
+The elite models can be accessed with the ea.elite_models attribute, returning a sorted list of the 
+trained elite models. 
+
+```python 
+elite_models = ga.elite_models
+
+[<keras.engine.functional.Functional at 0x2a194c8b0>,
+ <keras.engine.functional.Functional at 0x2b34b4dc0>]
+```
+
+
+
 
 
 

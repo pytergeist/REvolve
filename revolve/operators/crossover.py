@@ -1,13 +1,19 @@
+"""
+File containing functions for crossover evolutionary operations
+"""
+
 import random
-from typing import Tuple
+from typing import Tuple, Union
 from copy import deepcopy
-from revolve.architectures.base import BaseChromosome
+from revolve.architectures.chromosomes import MLPChromosome, Conv2DChromosome
+
+chromosome_type = Union[MLPChromosome, Conv2DChromosome]
 
 
 def uniform_crossover(
-    parents: Tuple[BaseChromosome],
+    parents: Tuple[chromosome_type, chromosome_type],
     probability: float = 0.5,
-) -> BaseChromosome:
+) -> Union[MLPChromosome, Conv2DChromosome]:
     """
     Performs uniform crossover on the given parents to produce an offspring.
 

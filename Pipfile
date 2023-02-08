@@ -8,6 +8,7 @@ numpy = "*"
 pandas = "*"
 h5py = "*"
 tensorflow = {version = "*", sys_platform = "== 'linux'"}
+tqdm = "*"
 
 [dev-packages]
 jupyter = "*"
