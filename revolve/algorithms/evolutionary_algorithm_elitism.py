@@ -174,7 +174,7 @@ class EvolutionaryAlgorithmElitism(BaseEvolutionaryAlgorithm):
         models = []
 
         if all(self.elite_models):
-            for idx, chromosome in enumerate(tqdm(self.population)):
+            for idx, chromosome in enumerate(tqdm(self.population, desc="Evaluating", leave=False)):
                 if idx > self.elitism_size - 1:
                     model = self.get_model_fitness(
                         chromosome,
@@ -188,10 +188,14 @@ class EvolutionaryAlgorithmElitism(BaseEvolutionaryAlgorithm):
                     self.get_elite_model_fitness(idx, chromosome, data)
                     models.append(self.elite_models[idx])
 
+            tqdm._instances.clear()
+
         else:
-            for chromosome in tqdm(self.population):
+            for chromosome in tqdm(self.population, desc="Evaluating", leave=False):
                 model = self.get_model_fitness(chromosome, data, self.strategy)
                 models.append(model)
+
+            tqdm._instances.clear()
 
         tf.keras.backend.clear_session()
 
@@ -254,7 +258,7 @@ class EvolutionaryAlgorithmElitism(BaseEvolutionaryAlgorithm):
         """
         self.population = self.strategy.generate_population(self.pop_size)
 
-        for generation in range(generations):
+        for generation in tqdm(range(generations), desc='Generations', leave=True):
             best_chromosome = self.evolve_population(data, generation)
             print(
                 f"Generation {generation}, \

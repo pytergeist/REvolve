@@ -7,11 +7,11 @@ name = "pypi"
 numpy = "*"
 pandas = "*"
 h5py = "*"
+jupyter = "*"
 tensorflow = {version = "*", sys_platform = "== 'linux'"}
 tqdm = "*"
 
 [dev-packages]
-jupyter = "*"
 tensorflow-addons = "*"
 scikit-learn = "*"
 tensorflow-macos = {version = "*", sys_platform = "== 'darwin'"}
