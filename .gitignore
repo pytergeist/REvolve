@@ -5,3 +5,4 @@ revolve/.ipynb_checkpoints
 revolve/coverage.sh
 revolve/conv_testing.ipynb
 examples/parameter_testing.ipynb
+.coverage*
