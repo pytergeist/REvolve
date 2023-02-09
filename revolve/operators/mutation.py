@@ -21,6 +21,6 @@ def random_mutation(
 
     for idx, _ in enumerate(offspring.genes):
         if random.uniform(0, 1) <= probability:
-            offspring.genes[idx].mutate(parameters)
+            offspring.genes[idx].mutate(idx, parameters)
 
     return offspring

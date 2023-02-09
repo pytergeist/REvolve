@@ -27,13 +27,13 @@ def test_gene_init(gene, gene_params, gene_type, request):
         (Conv2DGene, "conv_gene_params", "conv_learnable_params"),
     ],
 )
-def test_fc_gene_mutate(gene, gene_params, learnable_params, request):
+def test_gene_mutate(gene, gene_params, learnable_params, request):
     gene_params = request.getfixturevalue(gene_params)
     learnable_params = request.getfixturevalue(learnable_params)
 
     gene = gene(**gene_params)
     original_params = gene.parameters.copy()
-    gene.mutate(learnable_params)
+    gene.mutate(1, learnable_params)
     for param in gene.parameters.keys():
         assert getattr(gene, param) != original_params[param]
         assert getattr(gene, param) in learnable_params[param]
@@ -47,7 +47,7 @@ def test_fc_gene_mutate(gene, gene_params, learnable_params, request):
     "gene, gene_params",
     [(FCGene, "fc_gene_params"), (Conv2DGene, "conv_gene_params")],
 )
-def test_fc_gene_validate_params(gene, gene_params, request):
+def test_gene_validate_params(gene, gene_params, request):
     gene_params = request.getfixturevalue(gene_params)
     fc_gene = gene(**gene_params)
     assert fc_gene._validate_params() is None
@@ -57,7 +57,7 @@ def test_fc_gene_validate_params(gene, gene_params, request):
     "gene, gene_params",
     [(FCGene, "fc_gene_params"), (Conv2DGene, "conv_gene_params")],
 )
-def test_fc_gene_get_attributes(gene, gene_params, request):
+def test_gene_get_attributes(gene, gene_params, request):
     gene_params = request.getfixturevalue(gene_params)
     gene = gene(**gene_params)
     assert gene.get_attributes() == list(gene_params.values())
@@ -67,7 +67,7 @@ def test_fc_gene_get_attributes(gene, gene_params, request):
     "gene, gene_params",
     [(FCGene, "fc_gene_params"), (Conv2DGene, "conv_gene_params")],
 )
-def test_fc_gene_get_attribute_names(gene, gene_params, request):
+def test_gene_get_attribute_names(gene, gene_params, request):
     gene_params = request.getfixturevalue(gene_params)
     gene = gene(**gene_params)
     assert gene.get_attribute_names == list(gene_params.keys())
@@ -87,7 +87,7 @@ def test_parameter_gene_mutate(parameter_gene_params, parameter_learnable_params
     for key, value in parameter_gene_params.items():
         param_gene = ParameterGene(parameter_name=key, parameter=value)
         original_params = param_gene.parameters.copy()
-        param_gene.mutate(parameter_learnable_params)
+        param_gene.mutate(1, parameter_learnable_params)
         assert getattr(param_gene, key) != original_params[key]
         for param in param_gene.parameters.keys():
             assert getattr(param_gene, param) in parameter_learnable_params[param]

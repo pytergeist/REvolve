@@ -13,6 +13,8 @@ if TYPE_CHECKING:
     from revolve.architectures.genes import FCGene, Conv2DGene, ParameterGene
 
 import tensorflow as tf
+tf.compat.v1.disable_eager_execution()
+tf.compat.v1.enable_eager_execution()
 
 
 class BaseChromosome(ABC):
