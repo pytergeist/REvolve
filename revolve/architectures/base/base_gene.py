@@ -39,7 +39,7 @@ class BaseGene(ABC):
         This method should validate that the parameters of the gene are within acceptable ranges.
         """
 
-    def mutate(self, layer_idx: int, learnable_parameters: Dict[str, Optional[Any]]):
+    def mutate(self, learnable_parameters: Dict[str, Optional[Any]]):
         """
         Mutate the gene.
 
@@ -49,10 +49,7 @@ class BaseGene(ABC):
         for param in self.parameters:
             value = learnable_parameters.get(param)
             if value is not None and isinstance(value, list):
-                if layer_idx > 0 and param == ('hidden_neurons' or 'filters'):
-                    setattr(self, param, random.choice(value))
-                else:
-                    setattr(self, param, random.choice(list(filter(lambda num: num != 0, value))))
+                setattr(self, param, random.choice(value))
 
     def get_attributes(self):
         """
