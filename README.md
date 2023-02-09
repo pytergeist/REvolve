@@ -169,7 +169,7 @@ be returned by parsing the dataframe for the lowest loss value.
 
 ```python 
 model = best_chromosome.decode(params)
-df = ga.results_df()
+df = ea.results_df()
 best_chromosome_row = df[df.loss == df.loss.min()]
 ```
 
