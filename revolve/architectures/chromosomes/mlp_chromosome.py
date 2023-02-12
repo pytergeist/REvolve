@@ -59,9 +59,18 @@ class MLPChromosome(BaseChromosome):
         """
 
         _inputs = tf.keras.Input(shape=learnable_parameters.get("input_shape"))
-        x_mlp = _inputs
 
-        for gene in self.genes:
+        x_mlp = tf.keras.layers.Dense(
+            self.genes[0].hidden_neurons,
+            activation=self.genes[0].activation,
+            kernel_regularizer=tf.keras.regularizers.L1L2(
+                l1=self.genes[0].l1, l2=self.genes[0].l2
+            ),
+        )(_inputs)
+
+        x_mlp = tf.keras.layers.Dropout(self.genes[0].dropout)(x_mlp)
+
+        for gene in self.genes[1:]:
             if gene.gene_type == "fc" and gene.hidden_neurons != 0:
                 x_mlp = tf.keras.layers.Dense(
                     gene.hidden_neurons,

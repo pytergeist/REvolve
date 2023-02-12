@@ -59,23 +59,36 @@ class Conv2DChromosome(BaseChromosome):
         """
 
         _inputs = tf.keras.Input(shape=learnable_parameters.get("input_shape"))
-        x_conv = _inputs
 
-        for idx, gene in enumerate(self.genes):
+        x_conv = tf.keras.layers.Conv2D(
+            filters=self.genes[0].filters,
+            kernel_size=self.genes[0].kernel_size,
+            strides=self.genes[0].stride,
+            activation=self.genes[0].activation,
+            padding="same",
+        )(_inputs)
+        x_conv = tf.keras.layers.BatchNormalization()(x_conv)
+        if self.genes[1].gene_type == "conv2d" and self.genes[1].filters != 0:
+            x_conv = tf.keras.layers.MaxPool2D(
+                strides=self.genes[0].stride, padding="same"
+            )(x_conv)
+        else:
+            x_conv = tf.keras.layers.Flatten()(x_conv)
+
+        for idx, gene in enumerate(self.genes[1:]):
             if gene.gene_type == "conv2d" and gene.filters != 0:
-                if hasattr(self.genes[idx + 1], "filters"):
-                    if getattr(self.genes[idx + 1], "filters") != 0:
-                        x_conv = tf.keras.layers.Conv2D(
-                            filters=gene.filters,
-                            kernel_size=gene.kernel_size,
-                            strides=gene.stride,
-                            activation=gene.activation,
-                            padding="same",
-                        )(x_conv)
-                        x_conv = tf.keras.layers.BatchNormalization()(x_conv)
-                        x_conv = tf.keras.layers.MaxPool2D(
-                            strides=gene.stride, padding="same"
-                        )(x_conv)
+                if self.genes[idx + 2].gene_type != "fc":
+                    x_conv = tf.keras.layers.Conv2D(
+                        filters=gene.filters,
+                        kernel_size=gene.kernel_size,
+                        strides=gene.stride,
+                        activation=gene.activation,
+                        padding="same",
+                    )(x_conv)
+                    x_conv = tf.keras.layers.BatchNormalization()(x_conv)
+                    x_conv = tf.keras.layers.MaxPool2D(
+                        strides=gene.stride, padding="same"
+                    )(x_conv)
                 else:
                     x_conv = tf.keras.layers.Conv2D(
                         filters=gene.filters,
