@@ -17,6 +17,20 @@ def test_chromosome_get_unique_key(chromosome, request):
 
 
 @pytest.mark.parametrize(
+    "chromosome, params",
+    [
+        ("mlp_chromosome", "mlp_params"),
+        ("conv2d_chromosome", "conv_network_params"),
+    ],
+)
+def test_mlp_chromosome_decode(chromosome, params, request):
+    chromosome = request.getfixturevalue(chromosome)
+    params = request.getfixturevalue(params)
+    model = chromosome.decode(params)
+    assert isinstance(model, tf.keras.Model)
+
+
+@pytest.mark.parametrize(
     "chromosome, genes, gene_params",
     [
         ("mlp_chromosome", "mlp_chromosome_genes", "parameter_gene_params"),

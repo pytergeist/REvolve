@@ -33,7 +33,7 @@ def test_gene_mutate(gene, gene_params, learnable_params, request):
 
     gene = gene(**gene_params)
     original_params = gene.parameters.copy()
-    gene.mutate(learnable_params)
+    gene.mutate(1, learnable_params)
     for param in gene.parameters.keys():
         assert getattr(gene, param) != original_params[param]
         assert getattr(gene, param) in learnable_params[param]
@@ -87,7 +87,7 @@ def test_parameter_gene_mutate(parameter_gene_params, parameter_learnable_params
     for key, value in parameter_gene_params.items():
         param_gene = ParameterGene(parameter_name=key, parameter=value)
         original_params = param_gene.parameters.copy()
-        param_gene.mutate(parameter_learnable_params)
+        param_gene.mutate(1, parameter_learnable_params)
         assert getattr(param_gene, key) != original_params[key]
         for param in param_gene.parameters.keys():
             assert getattr(param_gene, param) in parameter_learnable_params[param]

@@ -152,7 +152,7 @@ class Conv2DStrategy(BaseStrategy):
             if key not in key_store:
                 if self.check_valid_architecture(
                     chromosome, "filters"
-                ):
+                ) and self.check_first_layer(chromosome, "filters"):
                     population.append(chromosome)
                     key_store.append(key)
 

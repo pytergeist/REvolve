@@ -108,7 +108,7 @@ class MLPStrategy(BaseStrategy):
             if key not in key_store:
                 if self.check_valid_architecture(
                     chromosome, "hidden_neurons"
-                ):
+                ) and self.check_first_layer(chromosome, "hidden_neurons"):
                     population.append(chromosome)
                     key_store.append(key)
 
