@@ -169,13 +169,12 @@ be returned by parsing the dataframe for the lowest loss value.
 
 ```python 
 model = best_chromosome.decode(params)
-<<<<<<< HEAD
+
 df = ga.results_df()
 best_chromosome_row = df[df.loss == df.loss.min() ]
-=======
+
 df = ea.results_df()
 best_chromosome_row = df[(df.loss == df.loss.min()) & (df.generation == df.generation.max())]
->>>>>>> main
 ```
 
 The elite models can be accessed with the ea.elite_models attribute, returning a sorted list of the 

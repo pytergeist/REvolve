@@ -97,16 +97,6 @@ class BaseStrategy(ABC):
         return any(test_layers)
 
     @staticmethod
-    def check_first_layer(
-        chromosome: Union[MLPChromosome, Conv2DChromosome], layer_param: str
-    ):
-        """
-        Check first layer layer_param (logits/filters) is not 0:
-            return True is this condition holds
-        """
-        return getattr(chromosome.genes[0], layer_param) != 0
-
-    @staticmethod
     def squeeze_fc_neurons(fc_block: List[FCGene]):
         """
         Constrain fully connected layer block such that h_0>h_2>...>h_n
