@@ -3,13 +3,12 @@ File containing Conv2DChromosome class:
     Conv2DChromosome represents the architecture of an 2d convolution network, including fully
     connected layer, 2d convolution layer and parameter genes
 """
-
+from __future__ import annotations
 import itertools
 from typing import (
     List,
     Union,
     Callable,
-    Dict,
 )
 
 import tensorflow as tf
