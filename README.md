@@ -114,13 +114,13 @@ from revolve.operators import Operations
 # example with roulette_wheel_selection
 operations = Operations()
 operations.register(roulette_wheel_selection)
-operations.register(uniform_crossover, probability=0.9)
+operations.register(uniform_crossover, probability=0.5)
 operations.register(mutation, probability=0.2)
 
 # example with tournament selection
 operations = Operations()
 operations.register(tournament_selection, size=5)
-operations.register(uniform_crossover, probability=0.9)
+operations.register(uniform_crossover, probability=0.5)
 operations.register(mutation, probability=0.2)
 ```
 
@@ -169,13 +169,8 @@ be returned by parsing the dataframe for the lowest loss value.
 
 ```python 
 model = best_chromosome.decode(params)
-<<<<<<< HEAD
-df = ga.results_df()
-best_chromosome_row = df[df.loss == df.loss.min() ]
-=======
 df = ea.results_df()
 best_chromosome_row = df[(df.loss == df.loss.min()) & (df.generation == df.generation.max())]
->>>>>>> main
 ```
 
 The elite models can be accessed with the ea.elite_models attribute, returning a sorted list of the 
