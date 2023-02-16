@@ -182,14 +182,3 @@ elite_models = ga.elite_models
 [<keras.engine.functional.Functional at 0x2a194c8b0>,
  <keras.engine.functional.Functional at 0x2b34b4dc0>]
 ```
-
-
-
-
-
-
-
-
-
-
-
