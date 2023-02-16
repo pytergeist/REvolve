@@ -3,7 +3,7 @@ File containing MLPChromosome class:
     MLPChromosome represents the architecture of an MLP network, including fully connected layer
     and parameter genes
 """
-
+from __future__ import annotations
 import itertools
 from typing import Union, List
 
