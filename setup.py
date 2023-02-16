@@ -21,5 +21,5 @@ setup(
         "tqdm",
 
     ],
-    packages=find_packages(exclude=['revolve.tests*', 'revolve.*.base*']),
+    packages=find_packages(exclude=['revolve.tests*']),
 )
