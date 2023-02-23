@@ -9,7 +9,7 @@ with open(os.path.join(cwd, 'README.md')) as f:
 setup(
     name='revolve',
     version='0.0.1',
-    description='Evolutionary Neural Architecture Search package for for regression tasks',
+    description='Evolutionary Neural Architecture Search package for regression tasks',
     long_description=long_description,
     author='Tom Pope',
     author_email='tompopeworks@gmail.com',
