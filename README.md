@@ -107,7 +107,7 @@ roulette_wheel_selection), one mutation operation (random_mutation), and one cro
 
 ```python 
 from revolve.operators import (
-    mutation,
+    random_mutation,
     tournament_selection,
     uniform_crossover,
     roulette_wheel_selection,
@@ -127,13 +127,13 @@ from revolve.operators import Operations
 operations = Operations()
 operations.register(roulette_wheel_selection)
 operations.register(uniform_crossover, probability=0.5)
-operations.register(mutation, probability=0.2)
+operations.register(random_mutation, probability=0.2)
 
 # example with tournament selection
 operations = Operations()
 operations.register(tournament_selection, size=5)
 operations.register(uniform_crossover, probability=0.5)
-operations.register(mutation, probability=0.2)
+operations.register(random_mutation, probability=0.2)
 ```
 
 ## Algorithms 
