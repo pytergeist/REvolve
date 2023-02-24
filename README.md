@@ -7,6 +7,14 @@ evolutionary operations (selection, mutation, and crossover) along with
 an Operator class which allows you to register different evolutionary
 operations based on your specific task. 
 
+## Installation
+Install tensorflow followed by REvolve from git.
+```
+pip install tensorflow
+pip install git+https://github.com/ThePopeLabs/REvolve.git
+```
+
+
 ## Grids
 
 Two search spaces are currently supported, one for multilayer perceptrons
