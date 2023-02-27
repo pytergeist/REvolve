@@ -1,3 +1,7 @@
+
+
+
+
 ## REvolve - A python library for evolutionary neural architecture search for regression tasks ##
 
 REvolve is a python library for performing simple evolutionary neural architecture search for regression problems.  REvolve is split into four components: algorithms, architectures, grids, and operators.  The algorithms' directory contains the evolutionary algorithms, architectures contains the 
@@ -77,8 +81,8 @@ loss = 'mean_squared_error'
 loss = tf.keras.losses.MeanSquaredError()
 ```
 
-The squeeze_fc parameter ensures that h_0>h_1>...>h_n, where h_n refers to the number of logits on hidden 
-layer n. The expand_conv parameter (seen in examples/conv2d_regression.ipynb -- coming very soon!) ensures that c_0<c_1<c_2...c_n, where c_n
+The squeeze_fc parameter ensures that h_0>=h_1>=...>=h_n, where h_n refers to the number of logits on hidden 
+layer n. The expand_conv parameter (seen in examples/conv2d_regression.ipynb -- coming very soon!) ensures that c_0=<c_1=<c_2...=<c_n, where c_n
 refers to the filter size of convolution layers n. These two parameter can be True/False to implement or not implament 
 the constraint. These constraints only apply to the initial population of architectures.
 
@@ -89,7 +93,7 @@ mlp_strategy = MLPStrategy(
     max_fc = 3,
     squeeze_fc=False, # do not constrain
     epochs=50,
-    callback=callback
+    callback=callback,
     loss='mean_squared_error',
     metric = tfa.metrics.RSquare(name='r_square'),
     parameters = mlp_params
@@ -103,7 +107,7 @@ roulette_wheel_selection), one mutation operation (random_mutation), and one cro
 
 ```python 
 from revolve.operators import (
-    mutation,
+    random_mutation,
     tournament_selection,
     uniform_crossover,
     roulette_wheel_selection,
@@ -123,13 +127,13 @@ from revolve.operators import Operations
 operations = Operations()
 operations.register(roulette_wheel_selection)
 operations.register(uniform_crossover, probability=0.5)
-operations.register(mutation, probability=0.2)
+operations.register(random_mutation, probability=0.2)
 
 # example with tournament selection
 operations = Operations()
 operations.register(tournament_selection, size=5)
 operations.register(uniform_crossover, probability=0.5)
-operations.register(mutation, probability=0.2)
+operations.register(random_mutation, probability=0.2)
 ```
 
 ## Algorithms 

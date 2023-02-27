@@ -46,11 +46,11 @@ class EvolutionaryAlgorithmElitism(BaseEvolutionaryAlgorithm):
     """
 
     def __init__(
-        self,
-        strategy: strategy_type,
-        pop_size: int,
-        elitism_size: int,
-        operations: Operations,
+            self,
+            strategy: strategy_type,
+            pop_size: int,
+            elitism_size: int,
+            operations: Operations,
     ):
         """
         Initializes the object of class `EvolutionaryAlgorithmElitism`
@@ -78,7 +78,7 @@ class EvolutionaryAlgorithmElitism(BaseEvolutionaryAlgorithm):
 
     @staticmethod
     def elitism(
-        population: List, elitism_size: int, models: List[tf.keras.Model]
+            population: List, elitism_size: int, models: List[tf.keras.Model]
     ) -> Tuple[List[chromosome_type], List[tf.keras.Model]]:
         """
         Function extract elite members of population
@@ -95,8 +95,8 @@ class EvolutionaryAlgorithmElitism(BaseEvolutionaryAlgorithm):
         """
 
         elite_idx = np.argsort([chromosome.loss for chromosome in population])[
-            :elitism_size
-        ]
+                    :elitism_size
+                    ]
         elite_models = list(list(map(models.__getitem__, elite_idx)))
         population = list(list(map(population.__getitem__, elite_idx)))
 
@@ -115,9 +115,9 @@ class EvolutionaryAlgorithmElitism(BaseEvolutionaryAlgorithm):
         ]
 
     def evolve_population(
-        self,
-        data: Tuple[tf.data.Dataset, tf.data.Dataset, tf.data.Dataset],
-        generation: int,
+            self,
+            data: Tuple[tf.data.Dataset, tf.data.Dataset, tf.data.Dataset],
+            generation: int,
     ) -> chromosome_type:
         """
         Function to evolve the population by applying selection, crossover and
@@ -159,7 +159,7 @@ class EvolutionaryAlgorithmElitism(BaseEvolutionaryAlgorithm):
         return self.get_min_fitness(prev_population)
 
     def _population_asses(
-        self, data: Tuple[tf.data.Dataset, tf.data.Dataset, tf.data.Dataset]
+            self, data: Tuple[tf.data.Dataset, tf.data.Dataset, tf.data.Dataset]
     ) -> List[tf.keras.Model]:
         """
         A helper function to evaluate the fitness of all models in population.
@@ -202,10 +202,10 @@ class EvolutionaryAlgorithmElitism(BaseEvolutionaryAlgorithm):
         return models
 
     def get_elite_model_fitness(
-        self,
-        idx: int,
-        chromosome: chromosome_type,
-        data: Tuple[tf.data.Dataset, tf.data.Dataset, tf.data.Dataset],
+            self,
+            idx: int,
+            chromosome: chromosome_type,
+            data: Tuple[tf.data.Dataset, tf.data.Dataset, tf.data.Dataset],
     ):
         """
         Evaluate the fitness of elite model from population and updates chromosome
@@ -242,9 +242,9 @@ class EvolutionaryAlgorithmElitism(BaseEvolutionaryAlgorithm):
         )
 
     def fit(
-        self,
-        data: Tuple[tf.data.Dataset, tf.data.Dataset, tf.data.Dataset],
-        generations: int,
+            self,
+            data: Tuple[tf.data.Dataset, tf.data.Dataset, tf.data.Dataset],
+            generations: int,
     ):
         """
         Train the evolutionary algorithm for a specified number of generations.
@@ -262,7 +262,7 @@ class EvolutionaryAlgorithmElitism(BaseEvolutionaryAlgorithm):
             best_chromosome = self.evolve_population(data, generation)
             print(
                 f"Generation {generation}, \
-                Best error: {best_chromosome.loss}, \
-                Best R2 {best_chromosome.metric}"
+                Best {self.strategy.loss.name}: {best_chromosome.loss}, \
+                Best {self.strategy.metric.name}: {best_chromosome.metric}"
             )
         return best_chromosome
