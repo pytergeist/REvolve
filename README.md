@@ -81,8 +81,8 @@ loss = 'mean_squared_error'
 loss = tf.keras.losses.MeanSquaredError()
 ```
 
-The squeeze_fc parameter ensures that h_0>h_1>...>h_n, where h_n refers to the number of logits on hidden 
-layer n. The expand_conv parameter (seen in examples/conv2d_regression.ipynb -- coming very soon!) ensures that c_0<c_1<c_2...c_n, where c_n
+The squeeze_fc parameter ensures that h_0>=h_1>=...>=h_n, where h_n refers to the number of logits on hidden 
+layer n. The expand_conv parameter (seen in examples/conv2d_regression.ipynb -- coming very soon!) ensures that c_0=<c_1=<c_2...=<c_n, where c_n
 refers to the filter size of convolution layers n. These two parameter can be True/False to implement or not implament 
 the constraint. These constraints only apply to the initial population of architectures.
 
