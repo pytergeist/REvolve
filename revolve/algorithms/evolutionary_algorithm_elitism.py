@@ -262,7 +262,7 @@ class EvolutionaryAlgorithmElitism(BaseEvolutionaryAlgorithm):
             best_chromosome = self.evolve_population(data, generation)
             print(
                 f"Generation {generation}, \
-                Best {self.strategy.loss.name}: {best_chromosome.loss}, \
-                Best {self.strategy.metric.name}: {best_chromosome.metric}"
+                Best loss: {best_chromosome.loss}, \
+                Best metric: {best_chromosome.metric}"
             )
         return best_chromosome

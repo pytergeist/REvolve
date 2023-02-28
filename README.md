@@ -1,7 +1,3 @@
-
-
-
-
 ## REvolve - A python library for evolutionary neural architecture search for regression tasks ##
 
 REvolve is a python library for performing simple evolutionary neural architecture search for regression problems.  REvolve is split into four components: algorithms, architectures, grids, and operators.  The algorithms' directory contains the evolutionary algorithms, architectures contains the 
