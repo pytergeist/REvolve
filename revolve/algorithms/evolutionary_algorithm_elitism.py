@@ -245,7 +245,7 @@ class EvolutionaryAlgorithmElitism(BaseEvolutionaryAlgorithm):
             self,
             data: Tuple[tf.data.Dataset, tf.data.Dataset, tf.data.Dataset],
             generations: int,
-    ):
+    ) -> chromosome_type:
         """
         Train the evolutionary algorithm for a specified number of generations.
 
@@ -254,7 +254,7 @@ class EvolutionaryAlgorithmElitism(BaseEvolutionaryAlgorithm):
         - generations (int): The number of generations to evolve the population for.
 
         Returns:
-        None
+        Union[MLPChromosome, Conv2DChromosome] : The best chromosome from the final generation.
         """
         self.population = self.strategy.generate_population(self.pop_size)
 
